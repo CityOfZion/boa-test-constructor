@@ -1,0 +1,41 @@
+[project]
+name = "boa_test_constructor"
+version = "0.0.0"
+description = """This project provides a unittest class for testing NEO3 Blockchain smart contracts
+       in style similar to unittest.IsolatedAsyncioTestCase.
+       It includes all necessary dependencies like a staic binary of a neo-go node to run tests against.
+       """
+readme = "README.rst"
+requires-python = ">=3.10"
+license = {file = "LICENSE.rst"}
+keywords = ["NEO3", "Blockchain", "unit test"]
+authors = [
+   {name = "Erik van den Brink", email = "erik@coz.io"},
+   {name = "Lucas Kenji Uezo"},
+   {name = "meevee98"},
+]
+dependencies = [
+   "neo-mamba @ git+https://github.com/CityOfZion/neo-mamba@master",
+   "PyYAML"
+]
+
+[project.optional-dependencies]
+dev = [
+   "tomlkit==0.12.1",
+   "requests",
+   "black"
+]
+
+[project.urls]
+Repository = "https://github.com/CityOfZion/boa-test-constructor"
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+target-version = ['py310']
+
+[tool.neogo]
+tag = "v0.102.0"

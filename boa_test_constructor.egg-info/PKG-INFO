@@ -1,0 +1,41 @@
+Metadata-Version: 2.1
+Name: boa-test-constructor
+Version: 0.0.0
+Summary: This project provides a unittest class for testing NEO3 Blockchain smart contracts
+Author: Lucas Kenji Uezo, meevee98
+Author-email: Erik van den Brink <erik@coz.io>
+License: Copyright (c) 2023-present COZ
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        
+Project-URL: Repository, https://github.com/CityOfZion/boa-test-constructor
+Keywords: NEO3,Blockchain,unit test
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.rst
+Requires-Dist: neo-mamba@ git+https://github.com/CityOfZion/neo-mamba@master
+Requires-Dist: PyYAML
+Provides-Extra: dev
+Requires-Dist: tomlkit==0.12.1; extra == "dev"
+Requires-Dist: requests; extra == "dev"
+Requires-Dist: black; extra == "dev"
+
+.. image:: .github/resources/images/logo.png
+    :width: 400 px
+    :align: center
+
+boa test constructor
+--------------------
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+   
+.. image:: https://img.shields.io/pypi/pyversions/boa-test-constructor
+   :target: https://pypi.org/project/neo-mamba
+   
+
+This project provides a unittest class for testing NEO3 Blockchain smart contracts in style similar to unittest.IsolatedAsyncioTestCase.
+It includes all necessary dependencies like a staic binary of a `neo-go <https://github.com/nspcc-dev/neo-go>`_ node to run tests against ensuring the results are the same as on the real network.
