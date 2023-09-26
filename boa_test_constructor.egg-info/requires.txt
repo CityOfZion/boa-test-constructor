@@ -1,7 +1,0 @@
-neo-mamba@ git+https://github.com/CityOfZion/neo-mamba@master
-PyYAML
-
-[dev]
-tomlkit==0.12.1
-requests
-black
