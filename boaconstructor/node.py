@@ -6,6 +6,7 @@ import logging
 import sys
 import time
 import yaml
+import platform
 
 import abc
 from neo3.wallet import wallet, account
@@ -49,10 +50,18 @@ class NeoGoNode(Node):
         # TODO: change this to resolve from the included resources in the distributed package
         # probably have to use something like https://docs.python.org/3.10/library/importlib.html#module-importlib.resources
         # right now it will resolve from test file location
-        cmd = f"../../scripts/neogo node --config-file {self.config_path}"
+
+        system = platform.system().lower()
+        prog = "neogo"
+        posix = True
+        if system == "windows":
+            prog += ".exe"
+            posix = False
+
+        cmd = f"../../scripts/{prog} node --config-file {self.config_path}"
 
         self._process = subprocess.Popen(
-            shlex.split(cmd),
+            shlex.split(cmd, posix=posix),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             bufsize=1,
