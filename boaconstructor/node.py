@@ -44,6 +44,8 @@ class NeoGoNode(Node):
         self._ready = False
         self.thread = None
         self._parse_config()
+        self._terminate = False
+        self.system = platform.system().lower()
 
     def start(self):
         log.debug("starting")
@@ -51,10 +53,9 @@ class NeoGoNode(Node):
         # probably have to use something like https://docs.python.org/3.10/library/importlib.html#module-importlib.resources
         # right now it will resolve from test file location
 
-        system = platform.system().lower()
         prog = "neogo"
         posix = True
-        if system == "windows":
+        if self.system == "windows":
             prog += ".exe"
             posix = False
 
@@ -73,6 +74,9 @@ class NeoGoNode(Node):
             for output in iter(process.stdout.readline, b""):
                 if "RPC server already started" in output:
                     self._ready = True
+                    if self.system != "windows":
+                        break
+                if self._terminate:
                     break
 
         self.thread = threading.Thread(target=process_stdout, args=(self._process,))
@@ -87,6 +91,9 @@ class NeoGoNode(Node):
         if self._process is not None:
             self._process.kill()
             self._process.wait()
+
+        if self.system == "windows" and self.thread.is_alive():
+            self._terminate = True
         log.debug("stopped")
 
     @classmethod
