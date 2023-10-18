@@ -3,8 +3,8 @@ import unittest
 import asyncio
 import enum
 import signal
-from typing import Optional, TypeVar, Type, cast
-from neo3.core import types
+from typing import Optional, TypeVar, Type, cast, Sequence
+from neo3.core import types, cryptography
 from neo3.wallet import account
 from neo3.api.wrappers import GenericContract, NEP17Contract, ChainFacade
 from neo3.api import noderpc
@@ -118,6 +118,22 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             return unwrap.as_int(exec_result), notifications
         elif return_type is bool:
             return unwrap.as_bool(exec_result), notifications
+        elif return_type is dict:
+            return unwrap.as_dict(exec_result), notifications
+        elif return_type is list:
+            return unwrap.as_list(exec_result), notifications
+        elif return_type is types.UInt160:
+            return unwrap.as_uint160(exec_result), notifications
+        elif return_type is types.UInt256:
+            return unwrap.as_uint256(exec_result), notifications
+        elif return_type is bytes:
+            return unwrap.as_bytes(exec_result), notifications
+        elif return_type is cryptography.ECPoint:
+            return unwrap.as_public_key(exec_result), notifications
+        elif return_type is None:
+            return unwrap.as_none(exec_result), notifications
+        else:
+            raise ValueError(f"unsupported return_type: {return_type}")
 
     @classmethod
     async def deploy(
