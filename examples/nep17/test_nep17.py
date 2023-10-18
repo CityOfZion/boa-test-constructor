@@ -1,29 +1,8 @@
-import enum
 import asyncio
-from dataclasses import dataclass
-from boaconstructor import AbortException, AssertException, SmartContractTestCase, Token
+from boaconstructor import AbortException, AssertException, SmartContractTestCase, Token, Nep17TransferEvent
 from neo3.api.wrappers import NEP17Contract
-from neo3.api import noderpc
 from neo3.wallet import account
 from neo3.core import types
-
-
-
-
-
-@dataclass
-class Nep17TransferEvent:
-    source: types.UInt160
-    destination: types.UInt160
-    amount: int
-
-    @classmethod
-    def from_notification(cls, n: noderpc.Notification):
-        stack = n.state.as_list()
-        source = stack[0].as_uint160()
-        destination = stack[1].as_uint160()
-        amount = stack[2].as_int()
-        return cls(source, destination, amount)
 
 
 class Nep17ContractTest(SmartContractTestCase):
@@ -53,7 +32,7 @@ class Nep17ContractTest(SmartContractTestCase):
         )
         await cls.transfer(
             Token.GAS, cls.genesis.script_hash, cls.user2.script_hash, 100
-        )
+        )   
 
     async def test_symbol(self):
         expected = "NEP17"
@@ -118,8 +97,9 @@ class Nep17ContractTest(SmartContractTestCase):
             "transfer",
             [self.user1.script_hash, self.user2.script_hash, user1_balance, None],
             return_type=bool,
-            signing_account=self.user1,
+            signing_accounts=[self.user1],
         )
+
         self.assertTrue(success)
         self.assertEqual(1, len(notifications))
         self.assertEqual("Transfer", notifications[0].event_name)
@@ -144,6 +124,6 @@ class Nep17ContractTest(SmartContractTestCase):
                 self.contract_hash,
                 10,
                 signing_account=self.genesis,
-                system_fee=100_000_000,  # we must manually set the system fee or the automated GAS calculation will
+                system_fee=100_000_000,  # TODO: check why it is not longer needed .we must manually set the system fee or the automated GAS calculation will
                 # prevent sending the transaction
             )

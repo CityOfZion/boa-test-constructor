@@ -75,9 +75,24 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         args: list = None,
         *,
         return_type: Type[T],
-        signing_account: Optional[account.Account] = None,
+        signing_accounts: Optional[Sequence[account.Account]] = None,
+        signers: Optional[Sequence[Signer]] = None,
         target_contract: Optional[types.UInt160] = None,
     ) -> tuple[T, list[noderpc.Notification]]:
+        """
+        Calls the contract specified by `contract_hash`
+
+        Args:
+            method: name of the method to call
+            args: method arguments
+            return_type: expected return type. Will be used to unwrap and cast the results.
+            signing_accounts:
+                If not specified a 'test_invoke' will be performed.
+                If specified an 'invoke' (=state persisting) will be performed. The default witness scope is CALLED_BY_ENTRY.
+                This can be overridden using the `signers` argument.
+            signers: a list of custom signers. Must have the same length as `signing_account` if that is specified.
+            target_contract: call a different contract than the one under test. e.g. NeoToken
+        """
         if target_contract is None:
             contract = GenericContract(cls.contract_hash)
         else:
@@ -85,33 +100,50 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
         facade = cls.node.facade
 
-        if signing_account is not None:
-            if signing_account.is_multisig:
-                sign_pair = (
-                    sign_insecure_with_multisig_account(
-                        signing_account, password="123"
-                    ),
-                    Signer(signing_account.script_hash),
-                )
+        if signing_accounts is not None:
+            signing_pairs = []
 
-            else:
-                sign_pair = (
-                    sign_insecure_with_account(signing_account, password="123"),
-                    Signer(signing_account.script_hash),
-                )
+            if signers is not None and len(signers) != len(signing_accounts):
+                raise ValueError(f"signing_accounts and signers length must be equal")
+
+            for i, signing_account in enumerate(signing_accounts):
+                if signers is None:
+                    signer = Signer(signing_account.script_hash)
+                else:
+                    # take it from the supplied list
+                    signer = signers[i]
+                if signing_account.is_multisig:
+                    signing_pairs.append(
+                        (
+                            sign_insecure_with_multisig_account(
+                                signing_account, password="123"
+                            ),
+                            signer,
+                        )
+                    )
+                else:
+                    signing_pairs.append(
+                        (
+                            sign_insecure_with_account(signing_account, password="123"),
+                            signer,
+                        )
+                    )
             receipt = await facade.invoke(
-                contract.call_function(method, args), signers=[sign_pair]
+                contract.call_function(method, args), signers=signing_pairs
             )
             exec_result = receipt.result
             notifications = receipt.notifications
         else:
-            receipt = await facade.test_invoke(contract.call_function(method, args))
+            receipt = await facade.test_invoke(
+                contract.call_function(method, args), signers=signers
+            )
             cls._check_vmstate(receipt)
             exec_result = receipt
-            receipt.notifications = cast(noderpc.ExecutionResultResponse, receipt.notifications)
+            receipt.notifications = cast(
+                noderpc.ExecutionResultResponse, receipt.notifications
+            )
             notifications = receipt.notifications
 
-        # TODO: handle remaining types
         if return_type is str:
             return unwrap.as_str(exec_result), notifications
         elif return_type is int:
