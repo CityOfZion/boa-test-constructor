@@ -1,0 +1,261 @@
+{
+    "name": "wrapped_gas",
+    "groups": [],
+    "abi": {
+        "methods": [
+            {
+                "name": "symbol",
+                "offset": 0,
+                "parameters": [],
+                "safe": true,
+                "returntype": "String"
+            },
+            {
+                "name": "decimals",
+                "offset": 2,
+                "parameters": [],
+                "safe": true,
+                "returntype": "Integer"
+            },
+            {
+                "name": "totalSupply",
+                "offset": 4,
+                "parameters": [],
+                "safe": true,
+                "returntype": "Integer"
+            },
+            {
+                "name": "balanceOf",
+                "offset": 25,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "account"
+                    }
+                ],
+                "safe": true,
+                "returntype": "Integer"
+            },
+            {
+                "name": "transfer",
+                "offset": 55,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "from_address"
+                    },
+                    {
+                        "type": "Hash160",
+                        "name": "to_address"
+                    },
+                    {
+                        "type": "Integer",
+                        "name": "amount"
+                    },
+                    {
+                        "type": "Any",
+                        "name": "data"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Boolean"
+            },
+            {
+                "name": "transferFrom",
+                "offset": 230,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "spender"
+                    },
+                    {
+                        "type": "Hash160",
+                        "name": "from_address"
+                    },
+                    {
+                        "type": "Hash160",
+                        "name": "to_address"
+                    },
+                    {
+                        "type": "Integer",
+                        "name": "amount"
+                    },
+                    {
+                        "type": "Any",
+                        "name": "data"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Boolean"
+            },
+            {
+                "name": "approve",
+                "offset": 471,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "owner"
+                    },
+                    {
+                        "type": "Hash160",
+                        "name": "spender"
+                    },
+                    {
+                        "type": "Integer",
+                        "name": "amount"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Boolean"
+            },
+            {
+                "name": "allowance",
+                "offset": 555,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "owner"
+                    },
+                    {
+                        "type": "Hash160",
+                        "name": "spender"
+                    }
+                ],
+                "safe": true,
+                "returntype": "Integer"
+            },
+            {
+                "name": "burn",
+                "offset": 722,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "account"
+                    },
+                    {
+                        "type": "Integer",
+                        "name": "amount"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Void"
+            },
+            {
+                "name": "verify",
+                "offset": 854,
+                "parameters": [],
+                "safe": false,
+                "returntype": "Boolean"
+            },
+            {
+                "name": "_deploy",
+                "offset": 905,
+                "parameters": [
+                    {
+                        "type": "Any",
+                        "name": "data"
+                    },
+                    {
+                        "type": "Boolean",
+                        "name": "update"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Void"
+            },
+            {
+                "name": "onNEP17Payment",
+                "offset": 861,
+                "parameters": [
+                    {
+                        "type": "Hash160",
+                        "name": "from_address"
+                    },
+                    {
+                        "type": "Integer",
+                        "name": "amount"
+                    },
+                    {
+                        "type": "Any",
+                        "name": "data"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Void"
+            },
+            {
+                "name": "_initialize",
+                "offset": 957,
+                "parameters": [],
+                "safe": false,
+                "returntype": "Void"
+            }
+        ],
+        "events": [
+            {
+                "name": "Transfer",
+                "parameters": [
+                    {
+                        "name": "from_addr",
+                        "type": "Any"
+                    },
+                    {
+                        "name": "to_addr",
+                        "type": "Any"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "Integer"
+                    }
+                ]
+            },
+            {
+                "name": "Approval",
+                "parameters": [
+                    {
+                        "name": "owner",
+                        "type": "Hash160"
+                    },
+                    {
+                        "name": "spender",
+                        "type": "Hash160"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "Integer"
+                    }
+                ]
+            }
+        ]
+    },
+    "permissions": [
+        {
+            "contract": "*",
+            "methods": [
+                "onNEP17Payment"
+            ]
+        },
+        {
+            "contract": "0xfffdc93764dbaddd97c48f252a53ea4643faa3fd",
+            "methods": [
+                "getContract"
+            ]
+        },
+        {
+            "contract": "0xd2a4cff31913016155e38e474a2c06d08be276cf",
+            "methods": [
+                "transfer"
+            ]
+        }
+    ],
+    "trusts": [],
+    "features": {},
+    "supportedstandards": [
+        "NEP-17"
+    ],
+    "extra": {
+        "Author": "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli",
+        "Description": "Wrapped GAS Example",
+        "Email": "contact@coz.io"
+    }
+}
