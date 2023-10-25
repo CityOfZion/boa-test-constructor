@@ -151,7 +151,7 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(transfer_zgas)
 
         # won't work, because the user did not allow the amm to transfer zNEO and zGAS
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertException):
             await self.call("add_liquidity", [transferred_amount_zneo, transferred_amount_zgas,
                                               0, 0, self.user.script_hash], return_type=list,
                             signing_accounts=[self.user])
@@ -310,7 +310,7 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(set_address)
 
         # can't remove liquidity, because the user doesn't have any
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertException):
             await self.call("remove_liquidity", [10000, 0, 0, self.user.script_hash],
                             return_type=list, signing_accounts=[self.owner])
 
@@ -466,7 +466,7 @@ class AmmContractTest(SmartContractTestCase):
 
         # won't work, because user did not have enough zNEO tokens
         # with self.assertRaises(AssertionException):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertException):
             await self.call("swap_tokens", [swapped_zneo, 0, self.zneo_contract_hash, self.user.script_hash],
                             return_type=list, signing_accounts=[self.user])
 
@@ -571,7 +571,7 @@ class AmmContractTest(SmartContractTestCase):
         swapped_zgas = 11 * 10 ** 8
 
         # won't work, because user did not have enough zGAS tokens
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertException):
             await self.call("swap_tokens", [swapped_zgas, 0, self.zgas_contract_hash, self.user.script_hash],
                             return_type=list, signing_accounts=[self.user])
 

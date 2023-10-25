@@ -131,6 +131,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             receipt = await facade.invoke(
                 contract.call_function(method, args), signers=signing_pairs
             )
+            cls._check_vmstate(receipt)
             exec_result = receipt.result
             notifications = receipt.notifications
         else:
