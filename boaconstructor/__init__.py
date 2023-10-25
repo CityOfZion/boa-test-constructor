@@ -3,6 +3,7 @@ import unittest
 import asyncio
 import enum
 import signal
+import re
 from typing import Optional, TypeVar, Type, cast, Sequence
 from neo3.core import types, cryptography
 from neo3.wallet import account
@@ -18,6 +19,8 @@ from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.contracts import nef, manifest
 from dataclasses import dataclass
 from boaconstructor.node import NeoGoNode, Node
+
+ASSERT_REASON = re.compile(r".*Reason: (.*)")
 
 
 class AssertException(Exception):
@@ -236,9 +239,9 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             )
         except ValueError as e:
             if "ASSERT" in str(e):
-                raise AssertException
+                raise AssertException(cls._get_assert_reason(str(e)))
             elif "ABORT" in str(e):
-                raise AbortException
+                raise AbortException(cls._get_assert_reason(str(e)))
             else:
                 raise e
         return receipt.result
@@ -249,11 +252,17 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             unwrap.check_state_ok(receipt)
         except ValueError as e:
             if "ASSERT" in receipt.exception:
-                raise AssertException
+                raise AssertException(cls._get_assert_reason(receipt.exception))
             elif "ABORT" in receipt.exception:
-                raise AbortException
+                raise AbortException(cls._get_assert_reason(receipt.exception))
             else:
                 raise e
+
+    @classmethod
+    def _get_assert_reason(self, exception: str):
+        m = ASSERT_REASON.match(exception)
+        if m is not None:
+            return m.group(1)
 
 
 @dataclass

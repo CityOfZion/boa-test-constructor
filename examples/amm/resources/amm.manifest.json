@@ -38,7 +38,7 @@
             },
             {
                 "name": "transfer",
-                "offset": 55,
+                "offset": 89,
                 "parameters": [
                     {
                         "type": "Hash160",
@@ -62,7 +62,7 @@
             },
             {
                 "name": "_deploy",
-                "offset": 2386,
+                "offset": 2820,
                 "parameters": [
                     {
                         "type": "Any",
@@ -78,7 +78,7 @@
             },
             {
                 "name": "onNEP17Payment",
-                "offset": 274,
+                "offset": 394,
                 "parameters": [
                     {
                         "type": "Hash160",
@@ -98,7 +98,7 @@
             },
             {
                 "name": "set_address",
-                "offset": 412,
+                "offset": 579,
                 "parameters": [
                     {
                         "type": "Hash160",
@@ -114,21 +114,21 @@
             },
             {
                 "name": "get_token_a",
-                "offset": 525,
+                "offset": 692,
                 "parameters": [],
                 "safe": false,
                 "returntype": "Hash160"
             },
             {
                 "name": "get_token_b",
-                "offset": 599,
+                "offset": 766,
                 "parameters": [],
                 "safe": false,
                 "returntype": "Hash160"
             },
             {
                 "name": "get_reserves",
-                "offset": 673,
+                "offset": 840,
                 "parameters": [],
                 "safe": false,
                 "returntype": "Array",
@@ -138,7 +138,7 @@
             },
             {
                 "name": "add_liquidity",
-                "offset": 724,
+                "offset": 891,
                 "parameters": [
                     {
                         "type": "Integer",
@@ -169,7 +169,7 @@
             },
             {
                 "name": "quote",
-                "offset": 1343,
+                "offset": 1611,
                 "parameters": [
                     {
                         "type": "Integer",
@@ -189,7 +189,7 @@
             },
             {
                 "name": "remove_liquidity",
-                "offset": 1364,
+                "offset": 1632,
                 "parameters": [
                     {
                         "type": "Integer",
@@ -216,7 +216,7 @@
             },
             {
                 "name": "swap_tokens",
-                "offset": 2107,
+                "offset": 2441,
                 "parameters": [
                     {
                         "type": "Integer",
@@ -240,13 +240,60 @@
             },
             {
                 "name": "_initialize",
-                "offset": 2432,
+                "offset": 2866,
                 "parameters": [],
                 "safe": false,
                 "returntype": "Void"
             }
         ],
         "events": [
+            {
+                "name": "Sync",
+                "parameters": [
+                    {
+                        "name": "reserve_token_a",
+                        "type": "Integer"
+                    },
+                    {
+                        "name": "reserve_token_b",
+                        "type": "Integer"
+                    }
+                ]
+            },
+            {
+                "name": "Burn",
+                "parameters": [
+                    {
+                        "name": "sender",
+                        "type": "Hash160"
+                    },
+                    {
+                        "name": "amount_token_a",
+                        "type": "Integer"
+                    },
+                    {
+                        "name": "amount_token_b",
+                        "type": "Integer"
+                    }
+                ]
+            },
+            {
+                "name": "Mint",
+                "parameters": [
+                    {
+                        "name": "sender",
+                        "type": "Hash160"
+                    },
+                    {
+                        "name": "amount_token_a",
+                        "type": "Integer"
+                    },
+                    {
+                        "name": "amount_token_b",
+                        "type": "Integer"
+                    }
+                ]
+            },
             {
                 "name": "Swap",
                 "parameters": [
@@ -273,23 +320,6 @@
                 ]
             },
             {
-                "name": "Burn",
-                "parameters": [
-                    {
-                        "name": "sender",
-                        "type": "Hash160"
-                    },
-                    {
-                        "name": "amount_token_a",
-                        "type": "Integer"
-                    },
-                    {
-                        "name": "amount_token_b",
-                        "type": "Integer"
-                    }
-                ]
-            },
-            {
                 "name": "Transfer",
                 "parameters": [
                     {
@@ -302,36 +332,6 @@
                     },
                     {
                         "name": "amount",
-                        "type": "Integer"
-                    }
-                ]
-            },
-            {
-                "name": "Sync",
-                "parameters": [
-                    {
-                        "name": "reserve_token_a",
-                        "type": "Integer"
-                    },
-                    {
-                        "name": "reserve_token_b",
-                        "type": "Integer"
-                    }
-                ]
-            },
-            {
-                "name": "Mint",
-                "parameters": [
-                    {
-                        "name": "sender",
-                        "type": "Hash160"
-                    },
-                    {
-                        "name": "amount_token_a",
-                        "type": "Integer"
-                    },
-                    {
-                        "name": "amount_token_b",
                         "type": "Integer"
                     }
                 ]

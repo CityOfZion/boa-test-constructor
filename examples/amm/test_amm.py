@@ -104,10 +104,13 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(0, balance_of_owner)
 
         # should fail when the script length is not 20
-        with self.assertRaises(AssertException):
+        with self.assertRaises(AssertException) as context:
             await self.call("balanceOf", [bytes(10)], return_type=int)
-        with self.assertRaises(AssertException):
+        self.assertIn("invalid account", str(context.exception))
+
+        with self.assertRaises(AssertException) as context:
             await self.call("balanceOf", [bytes(30)], return_type=int)
+        self.assertIn("invalid account", str(context.exception))
 
     async def test_06_quote(self):
         mock_amount_zneo = 1
@@ -150,12 +153,15 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(transfer_success)
 
         # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
-        with self.assertRaises(AbortException):
+        with self.assertRaises(AbortException) as context:
             await self.call(
                 "onNEP17Payment",
                 [self.user.script_hash, transferred_amount, None],
                 return_type=bool,
             )
+        self.assertEqual(
+            "Invalid token. Only zNEO or zGAS are accepted", str(context.exception)
+        )
 
     async def test_08_add_liquidity(self):
         mock_balance_zneo = 10_000_000
@@ -203,7 +209,7 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(transfer_zgas)
 
         # won't work, because the user did not allow the amm to transfer zNEO and zGAS
-        with self.assertRaises(AssertException):
+        with self.assertRaises(AssertException) as context:
             await self.call(
                 "add_liquidity",
                 [
@@ -216,6 +222,7 @@ class AmmContractTest(SmartContractTestCase):
                 return_type=list,
                 signing_accounts=[self.user],
             )
+        self.assertEqual("not allowed", str(context.exception))
 
         # approving the AMM contract, so that it will be able to transfer zNEO from user
         approve_zneo, _ = await self.call(
@@ -501,13 +508,14 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(set_address)
 
         # can't remove liquidity, because the user doesn't have any
-        with self.assertRaises(AssertException):
+        with self.assertRaises(AssertException) as context:
             await self.call(
                 "remove_liquidity",
-                [10000, 0, 0, self.user.script_hash],
+                [10000, 0, 0, self.owner.script_hash],
                 return_type=list,
                 signing_accounts=[self.owner],
             )
+        self.assertEqual("not enough liquidity", str(context.exception))
 
         transfer_neo = await self.transfer(
             Token.NEO,
@@ -788,13 +796,14 @@ class AmmContractTest(SmartContractTestCase):
         swapped_zneo = 1
 
         # won't work, because user did not have enough zNEO tokens
-        with self.assertRaises(AssertException):
+        with self.assertRaises(AssertException) as context:
             await self.call(
                 "swap_tokens",
                 [swapped_zneo, 0, self.zneo_contract_hash, self.user.script_hash],
                 return_type=list,
                 signing_accounts=[self.user],
             )
+        self.assertEqual("insufficient allowance", str(context.exception))
 
         # approving the AMM contract, so that it will be able to transfer zNEO from user
         approve_zneo, _ = await self.call(
@@ -1003,13 +1012,14 @@ class AmmContractTest(SmartContractTestCase):
         swapped_zgas = 11 * 10**8
 
         # won't work, because user did not have enough zGAS tokens
-        with self.assertRaises(AssertException):
+        with self.assertRaises(AssertException) as context:
             await self.call(
                 "swap_tokens",
                 [swapped_zgas, 0, self.zgas_contract_hash, self.user.script_hash],
                 return_type=list,
                 signing_accounts=[self.user],
             )
+        self.assertEqual("insufficient allowance", str(context.exception))
 
         # approving the AMM contract, so that it will be able to transfer zGAS from user
         approve_zneo, _ = await self.call(
