@@ -82,6 +82,7 @@ class AmmContractTest(SmartContractTestCase):
             "set_address",
             [self.zneo_contract_hash, self.zgas_contract_hash],
             return_type=bool,
+            signing_accounts=[self.owner]
         )
         self.assertFalse(set_address_again)
 
@@ -89,7 +90,7 @@ class AmmContractTest(SmartContractTestCase):
         symbol, _ = await self.call("symbol", return_type=str)
         self.assertEqual("AMM", symbol)
 
-    async def test_03_symbol(self):
+    async def test_03_decimals(self):
         decimals, _ = await self.call("decimals", return_type=int)
         self.assertEqual(8, decimals)
 
@@ -126,44 +127,7 @@ class AmmContractTest(SmartContractTestCase):
             mock_amount_zneo * mock_reverse_wgaz // mock_reverse_zneo, quote
         )
 
-    async def test_07_on_nep17_payment(self):
-        transferred_amount = 10
-        await self.call(
-            "set_address",
-            [self.zneo_contract_hash, self.zgas_contract_hash],
-            return_type=bool,
-            signing_accounts=[self.owner],
-        )
-        # adding the transferred_amount into user
-        await self.transfer(
-            Token.NEO,
-            self.genesis.script_hash,
-            self.zneo_contract_hash,
-            transferred_amount,
-        )
-
-        # the AMM will accept this transaction, but there is no reason to send tokens directly to the smart contract.
-        # to send tokens to the AMM you should use the add_liquidity function
-        transfer_success = await self.call(
-            "transfer",
-            [self.user.script_hash, self.contract_hash, transferred_amount, None],
-            return_type=bool,
-            target_contract=self.zneo_contract_hash,
-        )
-        self.assertTrue(transfer_success)
-
-        # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
-        with self.assertRaises(AbortException) as context:
-            await self.call(
-                "onNEP17Payment",
-                [self.user.script_hash, transferred_amount, None],
-                return_type=bool,
-            )
-        self.assertEqual(
-            "Invalid token. Only zNEO or zGAS are accepted", str(context.exception)
-        )
-
-    async def test_08_add_liquidity(self):
+    async def test_07_add_liquidity(self):
         mock_balance_zneo = 10_000_000
         mock_balance_zgas = 10_000_000
         zgas_decimals = 10**8
@@ -492,20 +456,19 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(transferred_amount_zneo, amount_zneo.as_int())
         self.assertEqual(transferred_amount_zgas_quoted, amount_zgas.as_int())
 
-    async def test_09_remove_liquidity(self):
+    async def test_08_remove_liquidity(self):
         zgas_decimals = 10**8
         test_balance_zneo = 10_000_000
         test_balance_zgas = 10_000_000 * zgas_decimals
         transferred_amount_zneo = 10
         transferred_amount_zgas = 110 * zgas_decimals
 
-        set_address = await self.call(
+        await self.call(
             "set_address",
             [self.zneo_contract_hash, self.zgas_contract_hash],
             return_type=bool,
             signing_accounts=[self.owner],
         )
-        self.assertTrue(set_address)
 
         # can't remove liquidity, because the user doesn't have any
         with self.assertRaises(AssertException) as context:
@@ -714,20 +677,19 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(reserves_after[0].as_int(), balance_amm_zneo_after)
         self.assertEqual(reserves_after[1].as_int(), balance_amm_zgas_after)
 
-    async def test_10_swap_zneo_to_zgas(self):
+    async def test_09_swap_zneo_to_zgas(self):
         zgas_decimals = 10**8
         test_balance_zneo = 10_000_000
         test_balance_zgas = 10_000_000 * zgas_decimals
         transferred_amount_zneo = 10
         transferred_amount_zgas = 110 * zgas_decimals
 
-        set_address = await self.call(
+        await self.call(
             "set_address",
             [self.zneo_contract_hash, self.zgas_contract_hash],
             return_type=bool,
             signing_accounts=[self.owner],
         )
-        self.assertTrue(set_address)
 
         transfer_neo = await self.transfer(
             Token.NEO,
@@ -932,7 +894,7 @@ class AmmContractTest(SmartContractTestCase):
             reserves_before[1].as_int() - swapped_zgas, reserves_after[1].as_int()
         )
 
-    async def test_11_swap_zgas_to_zneo(self):
+    async def test_10_swap_zgas_to_zneo(self):
         zgas_decimals = 10**8
         test_balance_zneo = 10_000_000
         test_balance_zgas = 10_000_000 * zgas_decimals
@@ -1148,3 +1110,51 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(
             reserves_before[1].as_int() + swapped_zgas, reserves_after[1].as_int()
         )
+
+    async def test_11_on_nep17_payment(self):
+        transferred_amount = 10
+        await self.call(
+            "set_address",
+            [self.zneo_contract_hash, self.zgas_contract_hash],
+            return_type=bool,
+            signing_accounts=[self.owner],
+        )
+        # adding the transferred_amount into user
+        t = await self.transfer(
+            Token.NEO,
+            self.genesis.script_hash,
+            self.user.script_hash,
+            transferred_amount,
+        )
+        self.assertTrue(t)
+        t = await self.transfer(
+            Token.NEO,
+            self.user.script_hash,
+            self.zneo_contract_hash,
+            transferred_amount,
+            signing_account=self.user
+        )
+        self.assertTrue(t)
+
+        # the AMM will accept this transaction, but there is no reason to send tokens directly to the smart contract.
+        # to send tokens to the AMM you should use the add_liquidity function
+        transfer_success, _ = await self.call(
+            "transfer",
+            [self.user.script_hash, self.contract_hash, transferred_amount, None],
+            return_type=bool,
+            target_contract=self.zneo_contract_hash,
+            signing_accounts=[self.user],
+        )
+        self.assertTrue(transfer_success)
+
+        # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
+        with self.assertRaises(AbortException) as context:
+            await self.call(
+                "onNEP17Payment",
+                [self.user.script_hash, transferred_amount, None],
+                return_type=bool,
+            )
+        self.assertEqual(
+            "Invalid token. Only zNEO or zGAS are accepted", str(context.exception)
+        )
+
