@@ -1,5 +1,11 @@
 import asyncio
-from boaconstructor import AbortException, AssertException, SmartContractTestCase, Token, Nep17TransferEvent
+from boaconstructor import (
+    AbortException,
+    AssertException,
+    SmartContractTestCase,
+    Token,
+    Nep17TransferEvent,
+)
 from neo3.api.wrappers import NEP17Contract
 from neo3.wallet import account
 from neo3.core import types
@@ -32,7 +38,7 @@ class Nep17ContractTest(SmartContractTestCase):
         )
         await cls.transfer(
             Token.GAS, cls.genesis.script_hash, cls.user2.script_hash, 100
-        )   
+        )
 
     async def test_symbol(self):
         expected = "NEP17"
@@ -53,7 +59,7 @@ class Nep17ContractTest(SmartContractTestCase):
 
     async def test_02_balance_of(self):
         contract_decimals = 8
-        expected = 100 * (10 ** contract_decimals)
+        expected = 100 * (10**contract_decimals)
 
         # first mint tokens
         success = await self.transfer(

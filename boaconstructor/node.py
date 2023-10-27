@@ -74,8 +74,8 @@ class NeoGoNode(Node):
             for output in iter(process.stdout.readline, b""):
                 if "RPC server already started" in output:
                     self._ready = True
-                    if self.system != "windows":
-                        break
+                    # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
+                    # we'll eventually hit the PIPE buffer limit and hang the child process.
                 if self._terminate:
                     break
 
@@ -92,7 +92,7 @@ class NeoGoNode(Node):
             self._process.kill()
             self._process.wait()
 
-        if self.system == "windows" and self.thread.is_alive():
+        if self.thread.is_alive():
             self._terminate = True
         log.debug("stopped")
 
