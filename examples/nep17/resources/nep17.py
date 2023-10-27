@@ -116,7 +116,7 @@ def balance_of(account: UInt160) -> int:
     :param account: the account address to retrieve the balance for
     :type account: UInt160
     """
-    assert len(account) == 20
+    assert len(account) == 20, "invalid account (data len != 20)"
     return type_helper.to_int(storage.get(account))
 
 
@@ -269,7 +269,7 @@ def onNEP17Payment(from_address: Union[UInt160, None], amount: int, data: Any):
         corresponding_amount = amount * AMOUNT_PER_GAS
         mint(from_addr, corresponding_amount)
     else:
-        abort()
+        abort("contract only accepts GAS")
 
 
 def get_owner() -> UInt160:

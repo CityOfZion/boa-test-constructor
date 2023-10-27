@@ -85,11 +85,10 @@ class Nep17ContractTest(SmartContractTestCase):
         # now test invalid account
         bad_account = b"\x01"
 
-        with self.assertRaises(AssertException):
+        with self.assertRaises(AssertException) as context:
             await self.call("balanceOf", [bad_account], return_type=int)
 
-        # if Opcode.ASSERTMSG is supported we could test the assert message as well
-        # self.assertIn("invalid account", str(context.exception))
+        self.assertIn("invalid account", str(context.exception))
 
     async def test_03_transfer_success(self):
         # test we have existing balance
@@ -123,13 +122,13 @@ class Nep17ContractTest(SmartContractTestCase):
         self.assertEqual(user1_balance, user2_balance)
 
     async def test_onnep17(self):
-        with self.assertRaises(AbortException):
+        with self.assertRaises(AbortException) as context:
             await self.transfer(
                 Token.NEO,
                 self.genesis.script_hash,
                 self.contract_hash,
                 10,
                 signing_account=self.genesis,
-                system_fee=100_000_000,  # TODO: check why it is not longer needed .we must manually set the system fee or the automated GAS calculation will
-                # prevent sending the transaction
+                system_fee=100_000_000,
             )
+        self.assertEqual("contract only accepts GAS", str(context.exception))
