@@ -128,6 +128,5 @@ class Nep17ContractTest(SmartContractTestCase):
                 self.contract_hash,
                 10,
                 signing_account=self.genesis,
-                system_fee=100_000_000,
             )
         self.assertEqual("contract only accepts GAS", str(context.exception))
