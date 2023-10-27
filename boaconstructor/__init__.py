@@ -1,7 +1,6 @@
 import pathlib
 import unittest
 import asyncio
-import enum
 import signal
 import re
 from typing import Optional, TypeVar, Type, cast, Sequence
@@ -15,7 +14,6 @@ from neo3.api.helpers.signing import (
     sign_insecure_with_multisig_account,
 )
 from neo3.api.helpers import unwrap
-from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.contracts import nef, manifest
 from dataclasses import dataclass
 from boaconstructor.node import NeoGoNode, Node
@@ -36,11 +34,6 @@ class AbortException(Exception):
 # TODO: see how to test check_witness
 
 T = TypeVar("T")
-
-
-class Token(enum.Enum):
-    NEO = 0
-    GAS = 1
 
 
 class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
@@ -204,18 +197,15 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
     @classmethod
     async def transfer(
         cls,
-        neo_or_gas: Token,
+        token: types.UInt160,
         source: types.UInt160,
         destination: types.UInt160,
         amount: int,
         signing_account: Optional[account.Account] = None,
         system_fee: int = 0,
-    ) -> bool:
-        if neo_or_gas == Token.NEO:
-            contract = NEP17Contract(CONTRACT_HASHES.NEO_TOKEN)
-        else:
-            contract = NEP17Contract(CONTRACT_HASHES.GAS_TOKEN)
+    ) -> tuple[bool, list[noderpc.Notification]]:
 
+        contract = NEP17Contract(token)
         if signing_account is None:
             signing_account = cls.node.account_committee
 
@@ -244,7 +234,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
                 raise AbortException(cls._get_assert_reason(str(e)))
             else:
                 raise e
-        return receipt.result
+        return receipt.result, receipt.notifications
 
     @classmethod
     def _check_vmstate(cls, receipt):

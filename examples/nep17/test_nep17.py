@@ -3,12 +3,15 @@ from boaconstructor import (
     AbortException,
     AssertException,
     SmartContractTestCase,
-    Token,
     Nep17TransferEvent,
 )
 from neo3.api.wrappers import NEP17Contract
 from neo3.wallet import account
 from neo3.core import types
+from neo3.contracts.contract import CONTRACT_HASHES
+
+NEO = CONTRACT_HASHES.NEO_TOKEN
+GAS = CONTRACT_HASHES.GAS_TOKEN
 
 
 class Nep17ContractTest(SmartContractTestCase):
@@ -33,12 +36,8 @@ class Nep17ContractTest(SmartContractTestCase):
         cls.genesis = cls.node.wallet.account_get_by_label("committee")
         cls.contract_hash = await cls.deploy("./resources/nep17.nef", cls.genesis)
         cls.contract = NEP17Contract(cls.contract_hash)
-        await cls.transfer(
-            Token.GAS, cls.genesis.script_hash, cls.user1.script_hash, 100
-        )
-        await cls.transfer(
-            Token.GAS, cls.genesis.script_hash, cls.user2.script_hash, 100
-        )
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.user1.script_hash, 100)
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.user2.script_hash, 100)
 
     async def test_symbol(self):
         expected = "NEP17"
@@ -62,8 +61,8 @@ class Nep17ContractTest(SmartContractTestCase):
         expected = 100 * (10**contract_decimals)
 
         # first mint tokens
-        success = await self.transfer(
-            Token.GAS,
+        success, _ = await self.transfer(
+            GAS,
             self.user1.script_hash,
             self.contract_hash,
             50,
@@ -124,7 +123,7 @@ class Nep17ContractTest(SmartContractTestCase):
     async def test_onnep17(self):
         with self.assertRaises(AbortException) as context:
             await self.transfer(
-                Token.NEO,
+                NEO,
                 self.genesis.script_hash,
                 self.contract_hash,
                 10,

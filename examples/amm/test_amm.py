@@ -1,10 +1,14 @@
 import asyncio
 import math
 
-from boaconstructor import AbortException, AssertException, SmartContractTestCase, Token
+from boaconstructor import AbortException, AssertException, SmartContractTestCase
 from neo3.api.wrappers import GenericContract
 from neo3.wallet import account
 from neo3.core import types
+from neo3.contracts.contract import CONTRACT_HASHES
+
+NEO = CONTRACT_HASHES.NEO_TOKEN
+GAS = CONTRACT_HASHES.GAS_TOKEN
 
 
 class AmmContractTest(SmartContractTestCase):
@@ -33,12 +37,8 @@ class AmmContractTest(SmartContractTestCase):
     async def asyncSetupClass(cls) -> None:
         cls.genesis = cls.node.wallet.account_get_by_label("committee")
 
-        await cls.transfer(
-            Token.GAS, cls.genesis.script_hash, cls.owner.script_hash, 100
-        )
-        await cls.transfer(
-            Token.GAS, cls.genesis.script_hash, cls.user.script_hash, 100
-        )
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.owner.script_hash, 100)
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.user.script_hash, 100)
 
         cls.contract_hash = await cls.deploy("./resources/amm.nef", cls.owner)
         cls.contract = GenericContract(cls.contract_hash)
@@ -82,7 +82,7 @@ class AmmContractTest(SmartContractTestCase):
             "set_address",
             [self.zneo_contract_hash, self.zgas_contract_hash],
             return_type=bool,
-            signing_accounts=[self.owner]
+            signing_accounts=[self.owner],
         )
         self.assertFalse(set_address_again)
 
@@ -140,29 +140,29 @@ class AmmContractTest(SmartContractTestCase):
             signing_accounts=[self.owner],
         )
         await self.transfer(
-            Token.NEO,
+            NEO,
             self.genesis.script_hash,
             self.user.script_hash,
             mock_balance_zneo,
         )
         await self.transfer(
-            Token.GAS,
+            GAS,
             self.genesis.script_hash,
             self.user.script_hash,
             mock_balance_zgas,
         )
 
         # minting zNEO to user
-        transfer_zneo = await self.transfer(
-            Token.NEO,
+        transfer_zneo, _ = await self.transfer(
+            NEO,
             self.user.script_hash,
             self.zneo_contract_hash,
             mock_balance_zneo,
             signing_account=self.user,
         )
         # minting zGAS to user
-        transfer_zgas = await self.transfer(
-            Token.GAS,
+        transfer_zgas, _ = await self.transfer(
+            GAS,
             self.user.script_hash,
             self.zgas_contract_hash,
             mock_balance_zgas,
@@ -480,14 +480,14 @@ class AmmContractTest(SmartContractTestCase):
             )
         self.assertEqual("not enough liquidity", str(context.exception))
 
-        transfer_neo = await self.transfer(
-            Token.NEO,
+        transfer_neo, _ = await self.transfer(
+            NEO,
             self.genesis.script_hash,
             self.user.script_hash,
             test_balance_zneo,
         )
-        transfer_gas = await self.transfer(
-            Token.GAS,
+        transfer_gas, _ = await self.transfer(
+            GAS,
             self.genesis.script_hash,
             self.user.script_hash,
             test_balance_zgas // zgas_decimals,
@@ -496,16 +496,16 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(transfer_gas)
 
         # minting zNEO to user
-        transfer_zneo = await self.transfer(
-            Token.NEO,
+        transfer_zneo, _ = await self.transfer(
+            NEO,
             self.user.script_hash,
             self.zneo_contract_hash,
             test_balance_zneo,
             signing_account=self.user,
         )
         # minting zGAS to user
-        transfer_zgas = await self.transfer(
-            Token.GAS,
+        transfer_zgas, _ = await self.transfer(
+            GAS,
             self.user.script_hash,
             self.zgas_contract_hash,
             test_balance_zgas // zgas_decimals,
@@ -691,14 +691,14 @@ class AmmContractTest(SmartContractTestCase):
             signing_accounts=[self.owner],
         )
 
-        transfer_neo = await self.transfer(
-            Token.NEO,
+        transfer_neo, _ = await self.transfer(
+            NEO,
             self.genesis.script_hash,
             self.user.script_hash,
             test_balance_zneo,
         )
-        transfer_gas = await self.transfer(
-            Token.GAS,
+        transfer_gas, _ = await self.transfer(
+            GAS,
             self.genesis.script_hash,
             self.user.script_hash,
             test_balance_zgas // zgas_decimals,
@@ -706,16 +706,16 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(transfer_neo)
         self.assertTrue(transfer_gas)
         # minting zNEO to user
-        transfer_zneo = await self.transfer(
-            Token.NEO,
+        transfer_zneo, _ = await self.transfer(
+            NEO,
             self.user.script_hash,
             self.zneo_contract_hash,
             test_balance_zneo,
             signing_account=self.user,
         )
         # minting zGAS to user
-        transfer_zgas = await self.transfer(
-            Token.GAS,
+        transfer_zgas, _ = await self.transfer(
+            GAS,
             self.user.script_hash,
             self.zgas_contract_hash,
             test_balance_zgas // zgas_decimals,
@@ -908,14 +908,14 @@ class AmmContractTest(SmartContractTestCase):
             signing_accounts=[self.owner],
         )
         self.assertTrue(set_address)
-        transfer_neo = await self.transfer(
-            Token.NEO,
+        transfer_neo, _ = await self.transfer(
+            NEO,
             self.genesis.script_hash,
             self.user.script_hash,
             test_balance_zneo,
         )
-        transfer_gas = await self.transfer(
-            Token.GAS,
+        transfer_gas, _ = await self.transfer(
+            GAS,
             self.genesis.script_hash,
             self.user.script_hash,
             test_balance_zgas // zgas_decimals,
@@ -923,16 +923,16 @@ class AmmContractTest(SmartContractTestCase):
         self.assertTrue(transfer_neo)
         self.assertTrue(transfer_gas)
         # minting zNEO to user
-        transfer_zneo = await self.transfer(
-            Token.NEO,
+        transfer_zneo, _ = await self.transfer(
+            NEO,
             self.user.script_hash,
             self.zneo_contract_hash,
             test_balance_zneo,
             signing_account=self.user,
         )
         # minting zGAS to user
-        transfer_zgas = await self.transfer(
-            Token.GAS,
+        transfer_zgas, _ = await self.transfer(
+            GAS,
             self.user.script_hash,
             self.zgas_contract_hash,
             test_balance_zgas // zgas_decimals,
@@ -1120,30 +1120,30 @@ class AmmContractTest(SmartContractTestCase):
             signing_accounts=[self.owner],
         )
         # adding the transferred_amount into user
-        t = await self.transfer(
-            Token.NEO,
+        t, _ = await self.transfer(
+            NEO,
             self.genesis.script_hash,
             self.user.script_hash,
             transferred_amount,
         )
         self.assertTrue(t)
-        t = await self.transfer(
-            Token.NEO,
+        t, _ = await self.transfer(
+            NEO,
             self.user.script_hash,
             self.zneo_contract_hash,
             transferred_amount,
-            signing_account=self.user
+            signing_account=self.user,
         )
         self.assertTrue(t)
 
         # the AMM will accept this transaction, but there is no reason to send tokens directly to the smart contract.
         # to send tokens to the AMM you should use the add_liquidity function
-        transfer_success, _ = await self.call(
-            "transfer",
-            [self.user.script_hash, self.contract_hash, transferred_amount, None],
-            return_type=bool,
-            target_contract=self.zneo_contract_hash,
-            signing_accounts=[self.user],
+        transfer_success, _ = await self.transfer(
+            self.zneo_contract_hash,
+            self.user.script_hash,
+            self.contract_hash,
+            transferred_amount,
+            self.user,
         )
         self.assertTrue(transfer_success)
 
@@ -1157,4 +1157,3 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(
             "Invalid token. Only zNEO or zGAS are accepted", str(context.exception)
         )
-
