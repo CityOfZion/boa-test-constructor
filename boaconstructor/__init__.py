@@ -37,8 +37,7 @@ T = TypeVar("T")
 
 
 class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
-    # TODO: make configurable
-    node: Node = NeoGoNode("resources/protocol.unittest.yml")
+    node: Node = NeoGoNode()
     contract_hash: types.UInt160
 
     async def asyncSetUp(self) -> None:
@@ -66,14 +65,14 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     async def call(
-        cls,
-        method: str,
-        args: list = None,
-        *,
-        return_type: Type[T],
-        signing_accounts: Optional[Sequence[account.Account]] = None,
-        signers: Optional[Sequence[Signer]] = None,
-        target_contract: Optional[types.UInt160] = None,
+            cls,
+            method: str,
+            args: list = None,
+            *,
+            return_type: Type[T],
+            signing_accounts: Optional[Sequence[account.Account]] = None,
+            signers: Optional[Sequence[Signer]] = None,
+            target_contract: Optional[types.UInt160] = None,
     ) -> tuple[T, list[noderpc.Notification]]:
         """
         Calls the contract specified by `contract_hash`
@@ -166,7 +165,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     async def deploy(
-        cls, path_to_nef: str, signing_account: account.Account
+            cls, path_to_nef: str, signing_account: account.Account
     ) -> types.UInt160:
         nef_path = pathlib.Path(path_to_nef)
         if not nef_path.is_file() or not nef_path.suffix == ".nef":
@@ -196,13 +195,13 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     async def transfer(
-        cls,
-        token: types.UInt160,
-        source: types.UInt160,
-        destination: types.UInt160,
-        amount: int,
-        signing_account: Optional[account.Account] = None,
-        system_fee: int = 0,
+            cls,
+            token: types.UInt160,
+            source: types.UInt160,
+            destination: types.UInt160,
+            amount: int,
+            signing_account: Optional[account.Account] = None,
+            system_fee: int = 0,
     ) -> tuple[bool, list[noderpc.Notification]]:
 
         contract = NEP17Contract(token)

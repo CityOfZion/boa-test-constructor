@@ -47,8 +47,9 @@ ApplicationConfiguration:
   Consensus:
     Enabled: true
     UnlockWallet:
-      Path: "resources/wallet1_solo.json"
+      Path: "wallet1_solo.json"
       Password: "one"
+      Relative: true
   P2PNotary:
     Enabled: false
     UnlockWallet:
