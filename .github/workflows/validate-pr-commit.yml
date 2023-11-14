@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-latest]
+        os: [windows-latest]
         python-version: ["3.10", "3.11"]
     steps:
       - name: Checkout code
@@ -98,7 +98,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-latest ]
+        os: [ windows-latest ]
         python-version: ["3.10", "3.11"]
     steps:
       - name: restore artifact
