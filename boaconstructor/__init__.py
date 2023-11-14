@@ -239,7 +239,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
     @classmethod
     async def get_storage(
         cls,
-        prefix: bytes = None,
+        prefix: Optional[bytes] = None,
         *,
         target_contract: Optional[types.UInt160] = None,
         remove_prefix: bool = False,
