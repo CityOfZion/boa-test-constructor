@@ -242,7 +242,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         prefix: bytes = None,
         *,
         target_contract: Optional[types.UInt160] = None,
-        remove_prefix: bool = False
+        remove_prefix: bool = False,
     ) -> dict[bytes, bytes]:
         """
         Gets the entries in the storage of the contract specified by `contract_hash`
