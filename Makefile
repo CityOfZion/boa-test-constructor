@@ -27,7 +27,7 @@ type: ## perform static type checking using mypy
 	mypy boaconstructor/
 
 black: ## apply black formatting
-	black boaconstructor/ examples/ tests/
+	black boaconstructor/ examples/ tests/ scripts/
 
 build: ## create source distribution and wheel
 	python -m build
