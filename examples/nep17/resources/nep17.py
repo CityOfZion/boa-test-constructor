@@ -42,6 +42,7 @@ def manifest_metadata() -> NeoMetadata:
 # The keys used to access the storage
 OWNER_KEY = b"owner"
 SUPPLY_KEY = b"totalSupply"
+BALANCE_PREFIX = b"b"
 
 # Symbol of the Token
 TOKEN_SYMBOL = "NEP17"
@@ -124,7 +125,7 @@ def balance_of(account: UInt160) -> int:
     :type account: UInt160
     """
     assert len(account) == 20, "invalid account (data len != 20)"
-    return type_helper.to_int(storage.get(account))
+    return type_helper.to_int(storage.get(BALANCE_PREFIX + account))
 
 
 @public
@@ -155,7 +156,7 @@ def transfer(
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = type_helper.to_int(storage.get(from_address))
+    from_balance = type_helper.to_int(storage.get(BALANCE_PREFIX + from_address))
     if from_balance < amount:
         return False
 
@@ -169,12 +170,12 @@ def transfer(
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
     if from_address != to_address and amount != 0:
         if from_balance == amount:
-            storage.delete(from_address)
+            storage.delete(BALANCE_PREFIX + from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put(BALANCE_PREFIX + from_address, from_balance - amount)
 
-        to_balance = type_helper.to_int(storage.get(to_address))
-        storage.put(to_address, to_balance + amount)
+        to_balance = type_helper.to_int(storage.get(BALANCE_PREFIX + to_address))
+        storage.put(BALANCE_PREFIX + to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -224,7 +225,7 @@ def mint(account: UInt160, amount: int):
         account_balance = balance_of(account)
 
         storage.put(SUPPLY_KEY, current_total_supply + amount)
-        storage.put(account, account_balance + amount)
+        storage.put(BALANCE_PREFIX + account, account_balance + amount)
 
         on_transfer(None, account, amount)
         post_transfer(None, account, amount, None)
@@ -252,7 +253,7 @@ def _deploy(data: Any, update: bool):
 
         storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
         storage.put(OWNER_KEY, container.sender)
-        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
+        storage.put(BALANCE_PREFIX + container.sender, TOKEN_TOTAL_SUPPLY)
 
         on_transfer(None, container.sender, TOKEN_TOTAL_SUPPLY)
 

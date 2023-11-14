@@ -18,6 +18,7 @@ class Nep17ContractTest(SmartContractTestCase):
     genesis: account.Account
     user1: account.Account
     user2: account.Account
+    balance_prefix: bytes = b"b"
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -70,16 +71,26 @@ class Nep17ContractTest(SmartContractTestCase):
         )
         self.assertTrue(success)
 
+        storage = await self.get_storage(
+            prefix=self.balance_prefix,
+            remove_prefix=True
+        )
+
         result, _ = await self.call(
             "balanceOf", [self.user1.script_hash], return_type=int
         )
         self.assertEqual(expected, result)
+        balance_key = self.user1.script_hash.to_array()
+        self.assertIn(balance_key, storage)
+        self.assertEqual(types.BigInteger(expected).to_array(), storage[balance_key])
 
         # now test with an account that doesn't exist
         expected = 0
         unknown_account = types.UInt160(b"\x01" * 20)
         result, _ = await self.call("balanceOf", [unknown_account], return_type=int)
         self.assertEqual(expected, result)
+        balance_key = unknown_account.to_array()
+        self.assertNotIn(balance_key, storage)
 
         # now test invalid account
         bad_account = b"\x01"
@@ -108,6 +119,11 @@ class Nep17ContractTest(SmartContractTestCase):
         self.assertEqual(1, len(notifications))
         self.assertEqual("Transfer", notifications[0].event_name)
 
+        storage = await self.get_storage(
+            prefix=self.balance_prefix,
+            remove_prefix=True
+        )
+
         # test we emitted the correct transfer event
         event = Nep17TransferEvent.from_notification(notifications[0])
         self.assertEqual(self.user1.script_hash, event.source)
@@ -119,6 +135,13 @@ class Nep17ContractTest(SmartContractTestCase):
             "balanceOf", [self.user2.script_hash], return_type=int
         )
         self.assertEqual(user1_balance, user2_balance)
+
+        # test storage updates
+        user1_balance_key = self.user1.script_hash.to_array()
+        user2_balance_key = self.user2.script_hash.to_array()
+        self.assertNotIn(user1_balance_key, storage)
+        self.assertIn(user2_balance_key, storage)
+        self.assertEqual(types.BigInteger(user1_balance).to_array(), storage[user2_balance_key])
 
     async def test_onnep17(self):
         with self.assertRaises(AbortException) as context:

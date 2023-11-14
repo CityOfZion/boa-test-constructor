@@ -38,7 +38,7 @@
             },
             {
                 "name": "transfer",
-                "offset": 89,
+                "offset": 93,
                 "parameters": [
                     {
                         "type": "Hash160",
@@ -62,14 +62,14 @@
             },
             {
                 "name": "verify",
-                "offset": 388,
+                "offset": 419,
                 "parameters": [],
                 "safe": false,
                 "returntype": "Boolean"
             },
             {
                 "name": "_deploy",
-                "offset": 552,
+                "offset": 584,
                 "parameters": [
                     {
                         "type": "Any",
@@ -85,16 +85,16 @@
             },
             {
                 "name": "onNEP17Payment",
-                "offset": 396,
+                "offset": 427,
                 "parameters": [
                     {
                         "type": "Any",
                         "union": [
                             {
-                                "type": "Hash160"
+                                "type": "Void"
                             },
                             {
-                                "type": "Void"
+                                "type": "Hash160"
                             }
                         ],
                         "name": "from_address"
@@ -113,7 +113,7 @@
             },
             {
                 "name": "_initialize",
-                "offset": 628,
+                "offset": 664,
                 "parameters": [],
                 "safe": false,
                 "returntype": "Void"

@@ -237,6 +237,40 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         return receipt.result, receipt.notifications
 
     @classmethod
+    async def get_storage(
+        cls,
+        prefix: bytes = None,
+        *,
+        target_contract: Optional[types.UInt160] = None,
+        remove_prefix: bool = False
+    ) -> dict[bytes, bytes]:
+        """
+        Gets the entries in the storage of the contract specified by `contract_hash`
+
+        Args:
+            prefix: prefix to filter the entries in the storage. Return the entire storage if not set.
+            target_contract: gets the storage of a different contract than the one under test. e.g. NeoToken
+            remove_prefix: whether the prefix should be removed from the output keys. False by default.
+        """
+        if target_contract is None:
+            contract = GenericContract(cls.contract_hash)
+        else:
+            contract = GenericContract(target_contract)
+
+        if not prefix and remove_prefix:
+            remove_prefix = False
+
+        results = {}
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+            async for k, v in rpc_client.find_states(contract.hash, prefix):
+                if remove_prefix:
+                    results[k.removeprefix(prefix)] = v
+                else:
+                    results[k] = v
+
+        return results
+
+    @classmethod
     def _check_vmstate(cls, receipt):
         try:
             unwrap.check_state_ok(receipt)
