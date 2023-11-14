@@ -14,16 +14,21 @@ from boa3.builtin.type import UInt160, helper as type_helper
 # METADATA
 # -------------------------------------------
 
+
 @metadata
 def manifest_metadata() -> NeoMetadata:
     """
     Defines this smart contract's metadata information
     """
     meta = NeoMetadata()
-    meta.supported_standards = ['NEP-17']
-    meta.add_permission(methods=['onNEP17Payment', 'allowance', 'transfer', 'transferFrom'])
+    meta.supported_standards = ["NEP-17"]
+    meta.add_permission(
+        methods=["onNEP17Payment", "allowance", "transfer", "transferFrom"]
+    )
 
-    meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
+    meta.author = (
+        "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
+    )
     meta.description = "Automated Market Maker Example"
     meta.email = "contact@coz.io"
     return meta
@@ -34,23 +39,23 @@ def manifest_metadata() -> NeoMetadata:
 # -------------------------------------------
 
 
-SUPPLY_KEY = b'totalSupply'
+SUPPLY_KEY = b"totalSupply"
 
 # Symbol of the Token
-TOKEN_SYMBOL = 'AMM'
+TOKEN_SYMBOL = "AMM"
 
 # Number of decimal places
 TOKEN_DECIMALS = 8
 
 # Percentage of tokens owned by a certain address
-PERCENTAGE_PREFIX = b'percentage_prefix'
+PERCENTAGE_PREFIX = b"percentage_prefix"
 
 # Address of token_a and token_b
-TOKEN_A = b'token_a_address'
-TOKEN_B = b'token_b_address'
+TOKEN_A = b"token_a_address"
+TOKEN_B = b"token_b_address"
 
 # Whether the smart contract was deployed or not
-DEPLOYED = b'deployed'
+DEPLOYED = b"deployed"
 
 # The fee for doing a swap. 1000 is 100%, 3 is 0.3% and so on
 FEE = 3
@@ -63,41 +68,25 @@ FEE = 3
 
 on_transfer = Nep17TransferEvent
 
-on_sync = CreateNewEvent(
-    [
-        ('reserve_token_a', int),
-        ('reserve_token_b', int)
-    ],
-    'Sync'
-)
+on_sync = CreateNewEvent([("reserve_token_a", int), ("reserve_token_b", int)], "Sync")
 
 on_mint = CreateNewEvent(
-    [
-        ('sender', UInt160),
-        ('amount_token_a', int),
-        ('amount_token_b', int)
-    ],
-    'Mint'
+    [("sender", UInt160), ("amount_token_a", int), ("amount_token_b", int)], "Mint"
 )
 
 on_burn = CreateNewEvent(
-    [
-        ('sender', UInt160),
-        ('amount_token_a', int),
-        ('amount_token_b', int)
-    ],
-    'Burn'
+    [("sender", UInt160), ("amount_token_a", int), ("amount_token_b", int)], "Burn"
 )
 
 on_swap = CreateNewEvent(
     [
-        ('sender', UInt160),
-        ('amount_token_a_in', int),
-        ('amount_token_b_in', int),
-        ('amount_token_a_out', int),
-        ('amount_token_b_out', int)
+        ("sender", UInt160),
+        ("amount_token_a_in", int),
+        ("amount_token_b_in", int),
+        ("amount_token_a_out", int),
+        ("amount_token_b_out", int),
     ],
-    'Swap'
+    "Swap",
 )
 
 
@@ -133,7 +122,7 @@ def decimals() -> int:
     return TOKEN_DECIMALS
 
 
-@public(name='totalSupply', safe=True)
+@public(name="totalSupply", safe=True)
 def total_supply() -> int:
     """
     Gets the total token supply deployed in the system.
@@ -146,7 +135,7 @@ def total_supply() -> int:
     return type_helper.to_int(storage.get(SUPPLY_KEY))
 
 
-@public(name='balanceOf', safe=True)
+@public(name="balanceOf", safe=True)
 def balance_of(account: UInt160) -> int:
     """
     Get the current balance of an address
@@ -161,7 +150,9 @@ def balance_of(account: UInt160) -> int:
 
 
 @public
-def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any) -> bool:
+def transfer(
+    from_address: UInt160, to_address: UInt160, amount: int, data: Any
+) -> bool:
     """
     Transfers an amount of AMM tokens from one account to another
 
@@ -216,7 +207,12 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     return True
 
 
-def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], amount: int, data: Any):
+def post_transfer(
+    from_address: Union[UInt160, None],
+    to_address: Union[UInt160, None],
+    amount: int,
+    data: Any,
+):
     """
     Checks if the one receiving NEP17 tokens is a smart contract and if it's one the onPayment method will be called
 
@@ -232,7 +228,7 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
     if to_address is not None:
         contract = ContractManagement.get_contract(to_address)
         if contract is not None:
-            call_contract(to_address, 'onNEP17Payment', [from_address, amount, data])
+            call_contract(to_address, "onNEP17Payment", [from_address, amount, data])
 
 
 @public
@@ -244,13 +240,15 @@ def _deploy(data: Any, update: bool):
     """
     if not update:
         container: Transaction = runtime.script_container
-        storage.put(b'owner', container.sender)
+        storage.put(b"owner", container.sender)
         storage.put(DEPLOYED, True)
 
 
 @public
 def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
-    if not runtime.calling_script_hash == storage.get(TOKEN_A) and not runtime.calling_script_hash == storage.get(TOKEN_B):
+    if not runtime.calling_script_hash == storage.get(
+        TOKEN_A
+    ) and not runtime.calling_script_hash == storage.get(TOKEN_B):
         abort("Invalid token. Only zNEO or zGAS are accepted")
 
 
@@ -260,7 +258,7 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
 
 
 def get_owner() -> UInt160:
-    return UInt160(storage.get(b'owner'))
+    return UInt160(storage.get(b"owner"))
 
 
 @public
@@ -281,7 +279,7 @@ def set_address(address_token_a: UInt160, address_token_b: UInt160) -> bool:
     if not type_helper.to_bool(storage.get(DEPLOYED)):
         return False
 
-    if storage.get(TOKEN_A) != b'' or storage.get(TOKEN_B) != b'':
+    if storage.get(TOKEN_A) != b"" or storage.get(TOKEN_B) != b"":
         return False
 
     storage.put(TOKEN_A, address_token_a)
@@ -307,12 +305,20 @@ def get_reserves() -> List[int]:
 
     :return: a list of 2 ints, the value in the first index is reserve of token_a and the second value is the reserve of token_b
     """
-    return [type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A)),
-            type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))]
+    return [
+        type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_A)),
+        type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B)),
+    ]
 
 
 @public
-def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amount_token_a_min: int, amount_token_b_min: int, user_address: UInt160) -> List[int]:
+def add_liquidity(
+    amount_token_a_desired: int,
+    amount_token_b_desired: int,
+    amount_token_a_min: int,
+    amount_token_b_min: int,
+    user_address: UInt160,
+) -> List[int]:
     """
     Adds liquidity to the pool, minting AMM tokens in the process.
 
@@ -345,28 +351,65 @@ def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amou
     # If there is already a liquidity pool, the best value of token_b or token_a will be calculated and then they will be
     # minted and added to the pool
     else:
-        amount_token_b_best = quote(amount_token_a_desired, reserve_token_a, reserve_token_b)
+        amount_token_b_best = quote(
+            amount_token_a_desired, reserve_token_a, reserve_token_b
+        )
         if amount_token_b_best <= amount_token_b_desired:
-            assert amount_token_b_best >= amount_token_b_min, "insufficient amount for token_b"
+            assert (
+                amount_token_b_best >= amount_token_b_min
+            ), "insufficient amount for token_b"
             amount_token_a = amount_token_a_desired
             amount_token_b = amount_token_b_best
         else:
-            amount_token_a_best = quote(amount_token_b_desired, reserve_token_b, reserve_token_a)
+            amount_token_a_best = quote(
+                amount_token_b_desired, reserve_token_b, reserve_token_a
+            )
             assert amount_token_a_best <= amount_token_a_desired
-            assert amount_token_a_best >= amount_token_a_min, "insufficient amount for token_a"
+            assert (
+                amount_token_a_best >= amount_token_a_min
+            ), "insufficient amount for token_a"
             amount_token_a = amount_token_a_best
             amount_token_b = amount_token_b_desired
 
     token_a = get_token_a()
     token_b = get_token_b()
-    amount_allowed_token_a = call_contract(token_a, 'allowance', [user_address, runtime.executing_script_hash])
-    amount_allowed_token_b = call_contract(token_b, 'allowance', [user_address, runtime.executing_script_hash])
-    if isinstance(amount_allowed_token_a, int) and isinstance(amount_allowed_token_b, int):
-        assert amount_allowed_token_a >= amount_token_a and amount_allowed_token_b >= amount_token_b, "not allowed"
+    amount_allowed_token_a = call_contract(
+        token_a, "allowance", [user_address, runtime.executing_script_hash]
+    )
+    amount_allowed_token_b = call_contract(
+        token_b, "allowance", [user_address, runtime.executing_script_hash]
+    )
+    if isinstance(amount_allowed_token_a, int) and isinstance(
+        amount_allowed_token_b, int
+    ):
+        assert (
+            amount_allowed_token_a >= amount_token_a
+            and amount_allowed_token_b >= amount_token_b
+        ), "not allowed"
     else:
         abort()
-    call_contract(token_a, 'transferFrom', [runtime.executing_script_hash, user_address, runtime.executing_script_hash, amount_token_a, None])
-    call_contract(token_b, 'transferFrom', [runtime.executing_script_hash, user_address, runtime.executing_script_hash, amount_token_b, None])
+    call_contract(
+        token_a,
+        "transferFrom",
+        [
+            runtime.executing_script_hash,
+            user_address,
+            runtime.executing_script_hash,
+            amount_token_a,
+            None,
+        ],
+    )
+    call_contract(
+        token_b,
+        "transferFrom",
+        [
+            runtime.executing_script_hash,
+            user_address,
+            runtime.executing_script_hash,
+            amount_token_b,
+            None,
+        ],
+    )
 
     # mint() will return the AMM tokens that were minted
     liquidity = mint(user_address)
@@ -397,8 +440,12 @@ def mint(user_address: UInt160) -> int:
     reserve_token_b = type_helper.to_int(storage.get(SUPPLY_KEY + TOKEN_B))
 
     # balance_token_a and balance_token_b are the actual amount that are in the balance of this smart contract
-    balance_token_a = call_contract(get_token_a(), 'balanceOf', [runtime.executing_script_hash])
-    balance_token_b = call_contract(get_token_b(), 'balanceOf', [runtime.executing_script_hash])
+    balance_token_a = call_contract(
+        get_token_a(), "balanceOf", [runtime.executing_script_hash]
+    )
+    balance_token_b = call_contract(
+        get_token_b(), "balanceOf", [runtime.executing_script_hash]
+    )
 
     liquidity: int
 
@@ -414,14 +461,19 @@ def mint(user_address: UInt160) -> int:
             liquidity = sqrt(amount_token_b * amount_token_a)
         # if the pool is not empty then the amount of AMM tokens that will be minted are calculated the way shown below
         else:
-            liquidity = min(amount_token_a * total_supply // reserve_token_a, amount_token_b * total_supply // reserve_token_b)
+            liquidity = min(
+                amount_token_a * total_supply // reserve_token_a,
+                amount_token_b * total_supply // reserve_token_b,
+            )
 
         assert liquidity > 0
 
         # updates the total supply of AMM tokens
         storage.put(SUPPLY_KEY, total_supply + liquidity)
         # change the amount of liquidity the user has
-        storage.put(user_address, type_helper.to_int(storage.get(user_address)) + liquidity)
+        storage.put(
+            user_address, type_helper.to_int(storage.get(user_address)) + liquidity
+        )
         on_transfer(None, user_address, liquidity)
 
         update(balance_token_a, balance_token_b)
@@ -456,7 +508,12 @@ def quote(amount_token1: int, reserve_token1: int, reserve_token2: int) -> int:
 
 
 @public
-def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min: int, user_address: UInt160) -> List[int]:
+def remove_liquidity(
+    liquidity: int,
+    amount_token_a_min: int,
+    amount_token_b_min: int,
+    user_address: UInt160,
+) -> List[int]:
     """
     Remove liquidity from the pool, burning the AMM token in the process and giving token_a and token_b back to the user.
 
@@ -480,7 +537,9 @@ def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min
     assert liquidity <= balance_of(user_address), "not enough liquidity"
     amount = burn(liquidity, user_address)
     # Verify if the amount of token_a and token_b are equal or greater than the minimum amount
-    assert amount[0] >= amount_token_a_min and amount[1] >= amount_token_b_min, "insufficient balance"
+    assert (
+        amount[0] >= amount_token_a_min and amount[1] >= amount_token_b_min
+    ), "insufficient balance"
     return amount
 
 
@@ -505,8 +564,12 @@ def burn(liquidity: int, user_address: UInt160) -> List[int]:
     token_a = get_token_a()
     token_b = get_token_b()
     # balance_token_a and balance_token_b are the actual amount that are in the balance of this smart contract
-    balance_token_a = call_contract(token_a, 'balanceOf', [runtime.executing_script_hash])
-    balance_token_b = call_contract(token_b, 'balanceOf', [runtime.executing_script_hash])
+    balance_token_a = call_contract(
+        token_a, "balanceOf", [runtime.executing_script_hash]
+    )
+    balance_token_b = call_contract(
+        token_b, "balanceOf", [runtime.executing_script_hash]
+    )
 
     amount_token_a: int = 0
     amount_token_b: int = 0
@@ -525,11 +588,23 @@ def burn(liquidity: int, user_address: UInt160) -> List[int]:
         storage.put(SUPPLY_KEY, total_supply - liquidity)
         on_transfer(user_address, None, liquidity)
 
-        call_contract(token_a, 'transfer', [runtime.executing_script_hash, user_address, amount_token_a, None])
-        call_contract(token_b, 'transfer', [runtime.executing_script_hash, user_address, amount_token_b, None])
+        call_contract(
+            token_a,
+            "transfer",
+            [runtime.executing_script_hash, user_address, amount_token_a, None],
+        )
+        call_contract(
+            token_b,
+            "transfer",
+            [runtime.executing_script_hash, user_address, amount_token_b, None],
+        )
 
-        balance_token_a = call_contract(token_a, 'balanceOf', [runtime.executing_script_hash])
-        balance_token_b = call_contract(token_b, 'balanceOf', [runtime.executing_script_hash])
+        balance_token_a = call_contract(
+            token_a, "balanceOf", [runtime.executing_script_hash]
+        )
+        balance_token_b = call_contract(
+            token_b, "balanceOf", [runtime.executing_script_hash]
+        )
 
         if isinstance(balance_token_a, int) and isinstance(balance_token_b, int):
             update(balance_token_a, balance_token_b)
@@ -584,17 +659,37 @@ def swap(amount_token_a_out: int, amount_token_b_out: int, user_address: UInt160
     token_a = get_token_a()
     token_b = get_token_b()
     if amount_token_a_out > 0:
-        call_contract(token_a, 'transfer', [runtime.executing_script_hash, user_address, amount_token_a_out, None])
+        call_contract(
+            token_a,
+            "transfer",
+            [runtime.executing_script_hash, user_address, amount_token_a_out, None],
+        )
     if amount_token_b_out > 0:
-        call_contract(token_b, 'transfer', [runtime.executing_script_hash, user_address, amount_token_b_out, None])
+        call_contract(
+            token_b,
+            "transfer",
+            [runtime.executing_script_hash, user_address, amount_token_b_out, None],
+        )
 
     # balance_token_a and balance_token_b are the actual amount that are in the balance of this smart contract
-    balance_token_a = call_contract(token_a, 'balanceOf', [runtime.executing_script_hash])
-    balance_token_b = call_contract(token_b, 'balanceOf', [runtime.executing_script_hash])
+    balance_token_a = call_contract(
+        token_a, "balanceOf", [runtime.executing_script_hash]
+    )
+    balance_token_b = call_contract(
+        token_b, "balanceOf", [runtime.executing_script_hash]
+    )
 
     if isinstance(balance_token_a, int) and isinstance(balance_token_b, int):
-        amount_token_a_in = balance_token_a - (reserve_token_a - amount_token_a_out) if balance_token_a > reserve_token_a - amount_token_a_out else 0
-        amount_token_b_in = balance_token_b - (reserve_token_b - amount_token_b_out) if balance_token_b > reserve_token_b - amount_token_b_out else 0
+        amount_token_a_in = (
+            balance_token_a - (reserve_token_a - amount_token_a_out)
+            if balance_token_a > reserve_token_a - amount_token_a_out
+            else 0
+        )
+        amount_token_b_in = (
+            balance_token_b - (reserve_token_b - amount_token_b_out)
+            if balance_token_b > reserve_token_b - amount_token_b_out
+            else 0
+        )
 
         assert amount_token_a_in > 0 or amount_token_b_in > 0
 
@@ -605,14 +700,22 @@ def swap(amount_token_a_out: int, amount_token_b_out: int, user_address: UInt160
         assert constant_k_new >= constant_k_old
 
         update(balance_token_a, balance_token_b)
-        on_swap(user_address, amount_token_a_in, amount_token_b_in, amount_token_a_out, amount_token_b_out)
+        on_swap(
+            user_address,
+            amount_token_a_in,
+            amount_token_b_in,
+            amount_token_a_out,
+            amount_token_b_out,
+        )
 
     else:
         abort()
 
 
 @public
-def swap_tokens(amount_in: int, amount_out_min: int, token_in: UInt160, user_address: UInt160) -> int:
+def swap_tokens(
+    amount_in: int, amount_out_min: int, token_in: UInt160, user_address: UInt160
+) -> int:
     """
     Swaps two tokens with a small fee in the process.
 
@@ -647,16 +750,30 @@ def swap_tokens(amount_in: int, amount_out_min: int, token_in: UInt160, user_add
 
     # Calculates the amount of tokens the user will receive
     amount_in_fee = amount_in * (1000 - FEE)
-    amount_out = amount_in_fee * reserve_token_out // (reserve_token_in * 1000 + amount_in_fee)
+    amount_out = (
+        amount_in_fee * reserve_token_out // (reserve_token_in * 1000 + amount_in_fee)
+    )
     assert amount_out >= amount_out_min, "insufficient out balance"
 
     # Checks if the user allowed enough tokens
-    amount_allowed = call_contract(token_in, 'allowance', [user_address, runtime.executing_script_hash])
+    amount_allowed = call_contract(
+        token_in, "allowance", [user_address, runtime.executing_script_hash]
+    )
     if isinstance(amount_allowed, int):
         assert amount_allowed >= amount_in, "insufficient allowance"
     else:
         abort()
-    call_contract(token_in, 'transferFrom', [runtime.executing_script_hash, user_address, runtime.executing_script_hash, amount_in, None])
+    call_contract(
+        token_in,
+        "transferFrom",
+        [
+            runtime.executing_script_hash,
+            user_address,
+            runtime.executing_script_hash,
+            amount_in,
+            None,
+        ],
+    )
 
     if amount_token_a_in != 0:
         swap(0, amount_out, user_address)

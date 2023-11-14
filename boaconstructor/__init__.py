@@ -67,14 +67,14 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     async def call(
-            cls,
-            method: str,
-            args: list = None,
-            *,
-            return_type: Type[T],
-            signing_accounts: Optional[Sequence[account.Account]] = None,
-            signers: Optional[Sequence[Signer]] = None,
-            target_contract: Optional[types.UInt160] = None,
+        cls,
+        method: str,
+        args: Optional[list] = None,
+        *,
+        return_type: Type[T],
+        signing_accounts: Optional[Sequence[account.Account]] = None,
+        signers: Optional[Sequence[Signer]] = None,
+        target_contract: Optional[types.UInt160] = None,
     ) -> tuple[T, list[noderpc.Notification]]:
         """
         Calls the contract specified by `contract_hash`
@@ -167,7 +167,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     async def deploy(
-            cls, path_to_nef: str, signing_account: account.Account
+        cls, path_to_nef: str, signing_account: account.Account
     ) -> types.UInt160:
         # fix relative path resolving by looking up the call stack because the test might not get started from
         # the working directory that defines the tests e.g. when using `unittest discover`
@@ -200,13 +200,13 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     async def transfer(
-            cls,
-            token: types.UInt160,
-            source: types.UInt160,
-            destination: types.UInt160,
-            amount: int,
-            signing_account: Optional[account.Account] = None,
-            system_fee: int = 0,
+        cls,
+        token: types.UInt160,
+        source: types.UInt160,
+        destination: types.UInt160,
+        amount: int,
+        signing_account: Optional[account.Account] = None,
+        system_fee: int = 0,
     ) -> tuple[bool, list[noderpc.Notification]]:
         contract = NEP17Contract(token)
         if signing_account is None:
