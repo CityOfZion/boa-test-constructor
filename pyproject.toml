@@ -15,7 +15,7 @@ authors = [
    {name = "meevee98"},
 ]
 dependencies = [
-   "neo-mamba @ git+https://github.com/CityOfZion/neo-mamba@af7de5fb5eed63389d2d3bfb3c08f2f7efb55841",
+   "neo-mamba==2.2.0",
    "PyYAML"
 ]
 
