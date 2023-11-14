@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-20.04, windows-latest]
         python-version: ["3.10", "3.11"]
     steps:
       - name: Checkout code
@@ -40,13 +40,22 @@ jobs:
           python -m venv venv
           venv\Scripts\activate
           pip install -e .[dev]
-      - name: build patched neo-go
+      - if: matrix.os != 'windows-latest'
+        name: build patched neo-go
         run: |
           git clone https://github.com/ixje/neo-go.git
           cd neo-go
           git checkout 61d9eda9932519d7f6c4c61daaecfd675df4a72a
           make
           mv bin/neo-go ../boatest/boaconstructor/data/neogo
+      - if: matrix.os == 'windows-latest'
+        name: build patched neo-go
+        run: |
+          git clone https://github.com/ixje/neo-go.git
+          cd neo-go
+          git checkout 61d9eda9932519d7f6c4c61daaecfd675df4a72a
+          make
+          mv bin/neo-go.exe ../boatest/boaconstructor/data/neogo.exe
       - name: prep for persist
         run: tar -czf boatest.tar.gz boatest
       - name: persist
@@ -84,12 +93,12 @@ jobs:
           source venv/bin/activate
           make type
   unit-tests:
-    name: Unit tests ${{ matrix.os }} Python ${{ matrix.python-version }}
+    name: Tests ${{ matrix.os }} Python ${{ matrix.python-version }}
     needs: setup
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
+        os: [ ubuntu-20.04, windows-latest ]
         python-version: ["3.10", "3.11"]
     steps:
       - name: restore artifact
