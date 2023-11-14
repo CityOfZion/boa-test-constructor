@@ -53,7 +53,9 @@ def main():
                         end="",
                     )
 
-                    module_path = machinery.PathFinder().find_spec("boaconstructor").origin
+                    module_path = (
+                        machinery.PathFinder().find_spec("boaconstructor").origin
+                    )
                     data_dir = pathlib.Path(module_path).parent.joinpath("data")
                     binary_filename = f"{data_dir}/neogo"
                     if system == "windows":
