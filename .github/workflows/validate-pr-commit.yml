@@ -1,0 +1,117 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  setup:
+    name: Setup ${{ matrix.os }} Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        python-version: ["3.10", "3.11"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: 'boatest'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.6.1
+        with:
+          python-version: ${{ matrix.python-version }}
+          check-latest: true
+      - if: matrix.os != 'windows-latest'
+        name: Setup install dependencies
+        run: |
+          cd boatest
+          python -m venv venv
+          source venv/bin/activate
+          pip install -e .[dev]
+      - if: matrix.os == 'windows-latest'
+        name: Setup install dependencies
+        run: |
+          cd boatest
+          python -m venv venv
+          venv\Scripts\activate
+          pip install -e .[dev]
+      - name: build patched neo-go
+        run: |
+          git clone https://github.com/ixje/neo-go.git
+          cd neo-go
+          git checkout 61d9eda9932519d7f6c4c61daaecfd675df4a72a
+          make
+          mv bin/neo-go ../boatest/boaconstructor/data/neogo
+      - name: prep for persist
+        run: tar -czf boatest.tar.gz boatest
+      - name: persist
+        uses: actions/upload-artifact@v3
+        with:
+          name: setup-artifact-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: boatest.tar.gz
+          retention-days: 1
+  linting:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@stable
+        with:
+          options: '--check --target-version py310'
+          version: '23.9.1'
+          src: "boaconstructor/ examples/ scripts/"
+  type-checking:
+    needs: setup
+    runs-on: ubuntu-20.04
+    steps:
+      - name: restore artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: setup-artifact-ubuntu-20.04-py3.10
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4.6.1
+        with:
+          python-version: "3.10"
+          check-latest: true
+      - name: extract & type check
+        run: |
+          tar -xf boatest.tar.gz
+          cd boatest
+          source venv/bin/activate
+          make type
+  unit-tests:
+    name: Unit tests ${{ matrix.os }} Python ${{ matrix.python-version }}
+    needs: setup
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04 ]
+        python-version: ["3.10", "3.11"]
+    steps:
+      - name: restore artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: setup-artifact-${{ matrix.os }}-py${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.1
+        with:
+          python-version: '${{ matrix.python-version }}'
+          check-latest: true
+      - if: success() && matrix.os != 'windows-latest'
+        name: extract and test
+        run: |
+          tar -xf boatest.tar.gz
+          cd boatest
+          source venv/bin/activate
+          make test
+      - if: success() && matrix.os == 'windows-latest'
+        name: extract and test
+        run: |
+          tar -xf boatest.tar.gz
+          cd boatest
+          venv\Scripts\activate
+          make test
