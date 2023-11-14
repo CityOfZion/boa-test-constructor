@@ -3,6 +3,7 @@ import unittest
 import asyncio
 import signal
 import re
+import inspect
 from typing import Optional, TypeVar, Type, cast, Sequence
 from neo3.core import types, cryptography
 from neo3.wallet import account
@@ -37,7 +38,7 @@ T = TypeVar("T")
 
 
 class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
-    node: Node = NeoGoNode()
+    node: Node
     contract_hash: types.UInt160
 
     async def asyncSetUp(self) -> None:
@@ -52,6 +53,8 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.node = NeoGoNode()
+        # these are called in reverse order
         cls.addClassCleanup(cls.node.reset)
         cls.addClassCleanup(cls.node.stop)
 
@@ -60,7 +63,6 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             cls.node.reset()
 
         signal.signal(signal.SIGINT, cleanup)
-
         cls.node.start()
 
     @classmethod
@@ -167,15 +169,18 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
     async def deploy(
             cls, path_to_nef: str, signing_account: account.Account
     ) -> types.UInt160:
-        nef_path = pathlib.Path(path_to_nef)
+        # fix relative path resolving by looking up the call stack because the test might not get started from
+        # the working directory that defines the tests e.g. when using `unittest discover`
+        frame = inspect.stack()[1]
+        nef_path = pathlib.Path(frame.filename).parent.joinpath(path_to_nef)
         if not nef_path.is_file() or not nef_path.suffix == ".nef":
             raise ValueError("invalid contract path specified")
         _nef = nef.NEF.from_file(str(nef_path.absolute()))
 
-        manifest_path = path_to_nef.replace(".nef", ".manifest.json")
+        manifest_path = nef_path.with_suffix("").with_suffix(".manifest.json")
         if not pathlib.Path(manifest_path).is_file():
             raise ValueError(f"can't find manifest at {manifest_path}")
-        _manifest = manifest.ContractManifest.from_file(manifest_path)
+        _manifest = manifest.ContractManifest.from_file(str(manifest_path))
 
         if signing_account.is_multisig:
             sign_pair = (
@@ -203,7 +208,6 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             signing_account: Optional[account.Account] = None,
             system_fee: int = 0,
     ) -> tuple[bool, list[noderpc.Notification]]:
-
         contract = NEP17Contract(token)
         if signing_account is None:
             signing_account = cls.node.account_committee

@@ -42,8 +42,12 @@ class NeoGoNode(Node):
         self.data_dir = pathlib.Path(__file__).parent.joinpath("data")
         if config_path is None:
             self.config_path = self.data_dir.joinpath("protocol.unittest.yml")
+            self.consensus_wallet_path = self.data_dir.joinpath("wallet1_solo.json")
         else:
             self.config_path = config_path
+            self.consensus_wallet_path = pathlib.Path(config_path).parent.joinpath(
+                "wallet1_solo.json"
+            )
         self.system = platform.system().lower()
         self._thread = None
         self._process = None
@@ -97,8 +101,7 @@ class NeoGoNode(Node):
             self._terminate = True
         log.debug("stopped")
 
-    @classmethod
-    def reset(cls):
+    def reset(self):
         # neo-go uses an in memory database so there's no need to reset anything
         pass
 
@@ -107,14 +110,9 @@ class NeoGoNode(Node):
             config: dict = list(yaml.load_all(f, yaml.FullLoader))[0]
             data = config["ApplicationConfiguration"]
 
-            # Note: the config must specify the Consensus.UnlockWallet.Relative key as true
-            consensus_wallet_path = (
-                pathlib.Path(self.config_path).parent
-                / data["Consensus"]["UnlockWallet"]["Path"]
-            )
             consensus_wallet_password = data["Consensus"]["UnlockWallet"]["Password"]
             tmp_wallet = wallet.Wallet.from_file(
-                str(consensus_wallet_path.absolute()),
+                str(self.consensus_wallet_path.absolute()),
                 passwords=[
                     consensus_wallet_password,
                     consensus_wallet_password,
