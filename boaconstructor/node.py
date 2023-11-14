@@ -41,7 +41,7 @@ class NeoGoNode(Node):
     def __init__(self, config_path: Optional[str] = None):
         self.data_dir = pathlib.Path(__file__).parent.joinpath("data")
         if config_path is None:
-            self.config_path = self.data_dir.joinpath("protocol.unittest.yml")
+            self.config_path = str(self.data_dir.joinpath("protocol.unittest.yml"))
             self.consensus_wallet_path = self.data_dir.joinpath("wallet1_solo.json")
         else:
             self.config_path = config_path
@@ -49,8 +49,8 @@ class NeoGoNode(Node):
                 "wallet1_solo.json"
             )
         self.system = platform.system().lower()
-        self._thread = None
-        self._process = None
+        self._thread: Optional[threading.Thread] = None
+        self._process: Optional[subprocess.Popen[str]] = None
         self._ready = False
         self._terminate = False
         self._parse_config()
@@ -97,7 +97,7 @@ class NeoGoNode(Node):
             self._process.kill()
             self._process.wait()
 
-        if self._thread.is_alive():
+        if self._thread is not None and self._thread.is_alive():
             self._terminate = True
         log.debug("stopped")
 
@@ -131,7 +131,7 @@ class NeoGoNode(Node):
             self.wallet.account_add(acc, is_default=True)
 
             self.account_committee = self.wallet.import_multisig_address(
-                1, [self.wallet.account_default.public_key]
+                1, [self.wallet.account_default.public_key]  # type: ignore
             )
             self.account_committee.label = "committee"
 

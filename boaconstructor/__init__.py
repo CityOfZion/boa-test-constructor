@@ -31,7 +31,6 @@ class AbortException(Exception):
 
 
 # TODO: include ability to read gas consumption
-# TODO: add ability to provide witness for call()
 # TODO: see how to test check_witness
 
 T = TypeVar("T")
@@ -132,36 +131,34 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             exec_result = receipt.result
             notifications = receipt.notifications
         else:
-            receipt = await facade.test_invoke(
+            receipt_ = await facade.test_invoke(
                 contract.call_function(method, args), signers=signers
             )
-            cls._check_vmstate(receipt)
-            exec_result = receipt
-            receipt.notifications = cast(
-                noderpc.ExecutionResultResponse, receipt.notifications
-            )
-            notifications = receipt.notifications
+            cls._check_vmstate(receipt_)
+            exec_result = receipt_
+            notifications = receipt_.notifications
 
+        # Can't seem to get mypy to understand the return type of the first element in the tuple
         if return_type is str:
-            return unwrap.as_str(exec_result), notifications
+            return unwrap.as_str(exec_result), notifications  # type: ignore
         elif return_type is int:
-            return unwrap.as_int(exec_result), notifications
+            return unwrap.as_int(exec_result), notifications  # type: ignore
         elif return_type is bool:
-            return unwrap.as_bool(exec_result), notifications
+            return unwrap.as_bool(exec_result), notifications  # type: ignore
         elif return_type is dict:
-            return unwrap.as_dict(exec_result), notifications
+            return unwrap.as_dict(exec_result), notifications  # type: ignore
         elif return_type is list:
-            return unwrap.as_list(exec_result), notifications
+            return unwrap.as_list(exec_result), notifications  # type: ignore
         elif return_type is types.UInt160:
-            return unwrap.as_uint160(exec_result), notifications
+            return unwrap.as_uint160(exec_result), notifications  # type: ignore
         elif return_type is types.UInt256:
-            return unwrap.as_uint256(exec_result), notifications
+            return unwrap.as_uint256(exec_result), notifications  # type: ignore
         elif return_type is bytes:
-            return unwrap.as_bytes(exec_result), notifications
+            return unwrap.as_bytes(exec_result), notifications  # type: ignore
         elif return_type is cryptography.ECPoint:
-            return unwrap.as_public_key(exec_result), notifications
+            return unwrap.as_public_key(exec_result), notifications  # type: ignore
         elif return_type is None:
-            return unwrap.as_none(exec_result), notifications
+            return unwrap.as_none(exec_result), notifications  # type: ignore
         else:
             raise ValueError(f"unsupported return_type: {return_type}")
 
