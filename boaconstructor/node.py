@@ -64,7 +64,7 @@ class NeoGoNode(Node):
             prog += ".exe"
             posix = False
 
-        cmd = f"{self.data_dir}/{prog} node --config-file {self.config_path}"
+        cmd = f"{self.data_dir}/{prog} node --config-file {self.config_path} --relative-path {self.consensus_wallet_path}"
 
         self._process = subprocess.Popen(
             shlex.split(cmd, posix=posix),
