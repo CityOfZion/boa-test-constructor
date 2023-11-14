@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ ubuntu-20.04, windows-latest, macos-latest]
         python-version: ["3.10", "3.11"]
     steps:
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
           venv\Scripts\activate
           pip install -e .[dev]
       - if: matrix.os != 'windows-latest'
-        name: build patched neo-go
+        name: build patched neo-go for Unix
         run: |
           git clone https://github.com/ixje/neo-go.git
           cd neo-go
@@ -49,7 +49,7 @@ jobs:
           make
           mv bin/neo-go ../boatest/boaconstructor/data/neogo
       - if: matrix.os == 'windows-latest'
-        name: build patched neo-go
+        name: build patched neo-go for Windows
         run: |
           git clone https://github.com/ixje/neo-go.git
           cd neo-go
@@ -98,7 +98,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-latest ]
+        os: [ ubuntu-20.04, windows-latest, macos-latest ]
         python-version: ["3.10", "3.11"]
     steps:
       - name: restore artifact
