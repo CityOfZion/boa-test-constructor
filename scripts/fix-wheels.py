@@ -15,7 +15,7 @@ from wheel.cli.tags import tags
 
 def main(wheel_dir):
     platform_tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
-    for f in pathlib.Path(wheel_dir).glob('**/*'):
+    for f in pathlib.Path(wheel_dir).glob("**/*"):
         if f.name.endswith("any.whl"):
             tags(str(f.absolute()), None, None, platform_tag, None, True)
 
