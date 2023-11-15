@@ -41,7 +41,7 @@ jobs:
           source venv/bin/activate
           make build
       - if: success() && matrix.os == 'windows-latest'
-        name: extract and test
+        name: extract and build
         run: |
           tar -xf boatest.tar.gz
           cd boatest
@@ -50,18 +50,18 @@ jobs:
       - name: Validate dist
         run: |
           pip install twine
-          twine check dist/*
+          twine check boatest/dist/*
       - if: github.event.inputs.pypi-target == 'Main' || github.event_name == 'push'
         name: Publish to PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          twine upload dist/*
+          twine upload boatest/dist/*
       - if: github.event.inputs.pypi-target == 'Test'
         name: Publish to Test-PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TEST_API_TOKEN }}
         run: |
-          twine upload --repository testpypi dist/*
+          twine upload --repository testpypi boatest/dist/*

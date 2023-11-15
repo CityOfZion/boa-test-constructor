@@ -1,6 +1,5 @@
 [project]
 name = "boa_test_constructor"
-version = "0.0.0"
 description = """This project provides a unittest class for testing NEO3 Blockchain smart contracts
        in style similar to unittest.IsolatedAsyncioTestCase.
        It includes all necessary dependencies like a staic binary of a neo-go node to run tests against.
@@ -14,6 +13,7 @@ authors = [
    {name = "Lucas Kenji Uezo"},
    {name = "meevee98"},
 ]
+dynamic = ["version"]
 dependencies = [
    "neo-mamba==2.2.0",
    "PyYAML"
@@ -45,3 +45,13 @@ tag = "v0.102.0"
 
 [tool.mypy]
 check_untyped_defs = true
+
+[tool.bumpversion]
+current_version = "0.1.0"
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "./boaconstructor/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
