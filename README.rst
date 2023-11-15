@@ -11,4 +11,4 @@ boa test constructor
    :target: https://pypi.org/project/boa-test-constructor
 
 This project provides a unittest class for testing NEO3 Blockchain smart contracts in style similar to unittest.IsolatedAsyncioTestCase.
-It includes all necessary dependencies like a staic binary of a `neo-go <https://github.com/nspcc-dev/neo-go>`_ node to run tests against ensuring the results are the same as on the real network.
+It includes all necessary dependencies like a static binary of a `neo-go <https://github.com/nspcc-dev/neo-go>`_ node to run tests against ensuring the results are the same as on the real network.
