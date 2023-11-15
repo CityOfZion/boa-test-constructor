@@ -34,11 +34,12 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           check-latest: true
       - if: success() && matrix.os != 'windows-latest'
-        name: extract and test
+        name: extract and build
         run: |
           tar -xf boatest.tar.gz
           cd boatest
           source venv/bin/activate
+          pip install wheel
           make build
       - if: success() && matrix.os == 'windows-latest'
         name: extract and build
@@ -46,6 +47,7 @@ jobs:
           tar -xf boatest.tar.gz
           cd boatest
           venv\Scripts\activate
+          pip install wheel
           make build
       - name: Validate dist
         run: |
