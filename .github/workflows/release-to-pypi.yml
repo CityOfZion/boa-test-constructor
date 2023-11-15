@@ -53,6 +53,16 @@ jobs:
         run: |
           pip install twine
           twine check boatest/dist/*
+      - name: Draft release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: Draft
+          name: Draft
+          draft: true
+          files: |
+            boatest/dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.deploy }}
       - if: github.event.inputs.pypi-target == 'Main' || github.event_name == 'push'
         name: Publish to PyPi
         env:
@@ -67,13 +77,3 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_TEST_API_TOKEN }}
         run: |
           twine upload --repository testpypi boatest/dist/*
-      - name: Draft release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: Draft
-          name: Draft
-          draft: true
-          files: |
-            boatest/dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.deploy }}
