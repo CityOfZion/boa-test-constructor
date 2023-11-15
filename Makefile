@@ -30,14 +30,7 @@ black: ## apply black formatting
 	black boaconstructor/ examples/ tests/ scripts/
 
 build: ## create wheel
-	{ \
-	set -e ;\
-	python -m build ;\
-	#PLATFORM_TAG=$(python -c 'import sysconfig; print(sysconfig.get_platform().replace("-","_").replace(".","_"))';) ;\
-	#OLD_WHEEL=$(find dist/ -name *.whl) ;\
-	python -m wheel tags --platform-tag $$(python -c 'import sysconfig; print(sysconfig.get_platform().replace("-","_").replace(".","_"))';) $$(find dist/ -name *.whl) ;\
-	rm dist/*any.whl ;\
-	}
+	python -m build && python scripts/fix-wheels.py dist/
 
 version-major: ## bump the major version prior to release, auto commits and tag
 	bumpversion bump major
