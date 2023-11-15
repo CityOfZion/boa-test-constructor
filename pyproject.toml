@@ -5,7 +5,7 @@ description = """This project provides a unittest class for testing NEO3 Blockch
        It includes all necessary dependencies like a staic binary of a neo-go node to run tests against.
        """
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<=3.12"
 license = {file = "LICENSE.rst"}
 keywords = ["NEO3", "Blockchain", "unit test"]
 authors = [
@@ -55,3 +55,6 @@ tag = true
 filename = "./boaconstructor/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
+
+[tool.setuptools.dynamic]
+version = { attr = "boaconstructor.__version__" }
