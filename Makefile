@@ -29,8 +29,15 @@ type: ## perform static type checking using mypy
 black: ## apply black formatting
 	black boaconstructor/ examples/ tests/ scripts/
 
-build: ## create source distribution and wheel
-	python -m build
+build: ## create wheel
+	{ \
+	set -e ;\
+	python -m build ;\
+	#PLATFORM_TAG=$(python -c 'import sysconfig; print(sysconfig.get_platform().replace("-","_").replace(".","_"))';) ;\
+	#OLD_WHEEL=$(find dist/ -name *.whl) ;\
+	python -m wheel tags --platform-tag $$(python -c 'import sysconfig; print(sysconfig.get_platform().replace("-","_").replace(".","_"))';) $$(find dist/ -name *.whl) ;\
+	rm dist/*any.whl ;\
+	}
 
 version-major: ## bump the major version prior to release, auto commits and tag
 	bumpversion bump major
