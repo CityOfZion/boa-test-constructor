@@ -7,10 +7,10 @@ import sys
 import time
 import yaml
 import platform
-
 import abc
 from neo3.wallet import wallet, account
 from neo3.api.wrappers import ChainFacade
+from typing import Optional
 
 log = logging.getLogger("neogo")
 log.addHandler(logging.StreamHandler(sys.stdout))
@@ -38,20 +38,25 @@ class Node(abc.ABC):
 
 
 class NeoGoNode(Node):
-    def __init__(self, config_path: str):
-        self.config_path = str(pathlib.Path(config_path).absolute())
-        self._process = None
-        self._ready = False
-        self.thread = None
-        self._parse_config()
-        self._terminate = False
+    def __init__(self, config_path: Optional[str] = None):
+        self.data_dir = pathlib.Path(__file__).parent.joinpath("data")
+        if config_path is None:
+            self.config_path = str(self.data_dir.joinpath("protocol.unittest.yml"))
+            self.consensus_wallet_path = self.data_dir.joinpath("wallet1_solo.json")
+        else:
+            self.config_path = config_path
+            self.consensus_wallet_path = pathlib.Path(config_path).parent.joinpath(
+                "wallet1_solo.json"
+            )
         self.system = platform.system().lower()
+        self._thread: Optional[threading.Thread] = None
+        self._process: Optional[subprocess.Popen[str]] = None
+        self._ready = False
+        self._terminate = False
+        self._parse_config()
 
     def start(self):
         log.debug("starting")
-        # TODO: change this to resolve from the included resources in the distributed package
-        # probably have to use something like https://docs.python.org/3.10/library/importlib.html#module-importlib.resources
-        # right now it will resolve from test file location
 
         prog = "neogo"
         posix = True
@@ -59,7 +64,7 @@ class NeoGoNode(Node):
             prog += ".exe"
             posix = False
 
-        cmd = f"../../scripts/{prog} node --config-file {self.config_path}"
+        cmd = f"{self.data_dir}/{prog} node --config-file {self.config_path} --relative-path {self.consensus_wallet_path}"
 
         self._process = subprocess.Popen(
             shlex.split(cmd, posix=posix),
@@ -79,8 +84,8 @@ class NeoGoNode(Node):
                 if self._terminate:
                     break
 
-        self.thread = threading.Thread(target=process_stdout, args=(self._process,))
-        self.thread.start()
+        self._thread = threading.Thread(target=process_stdout, args=(self._process,))
+        self._thread.start()
 
         while not self._ready:
             time.sleep(0.0001)
@@ -92,12 +97,11 @@ class NeoGoNode(Node):
             self._process.kill()
             self._process.wait()
 
-        if self.thread.is_alive():
+        if self._thread is not None and self._thread.is_alive():
             self._terminate = True
         log.debug("stopped")
 
-    @classmethod
-    def reset(cls):
+    def reset(self):
         # neo-go uses an in memory database so there's no need to reset anything
         pass
 
@@ -106,15 +110,9 @@ class NeoGoNode(Node):
             config: dict = list(yaml.load_all(f, yaml.FullLoader))[0]
             data = config["ApplicationConfiguration"]
 
-            # TODO: the config file defines the path as relative to where neogo was ran from, this 'parent.parent' assumes project root
-            # which does not have to be the case. Make resilient
-            consensus_wallet_path = (
-                pathlib.Path(self.config_path).parent.parent
-                / data["Consensus"]["UnlockWallet"]["Path"]
-            )
             consensus_wallet_password = data["Consensus"]["UnlockWallet"]["Password"]
             tmp_wallet = wallet.Wallet.from_file(
-                str(consensus_wallet_path.absolute()),
+                str(self.consensus_wallet_path.absolute()),
                 passwords=[
                     consensus_wallet_password,
                     consensus_wallet_password,
@@ -133,7 +131,7 @@ class NeoGoNode(Node):
             self.wallet.account_add(acc, is_default=True)
 
             self.account_committee = self.wallet.import_multisig_address(
-                1, [self.wallet.account_default.public_key]
+                1, [self.wallet.account_default.public_key]  # type: ignore
             )
             self.account_committee.label = "committee"
 

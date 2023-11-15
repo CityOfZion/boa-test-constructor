@@ -71,10 +71,7 @@ class Nep17ContractTest(SmartContractTestCase):
         )
         self.assertTrue(success)
 
-        storage = await self.get_storage(
-            prefix=self.balance_prefix,
-            remove_prefix=True
-        )
+        storage = await self.get_storage(prefix=self.balance_prefix, remove_prefix=True)
 
         result, _ = await self.call(
             "balanceOf", [self.user1.script_hash], return_type=int
@@ -119,10 +116,7 @@ class Nep17ContractTest(SmartContractTestCase):
         self.assertEqual(1, len(notifications))
         self.assertEqual("Transfer", notifications[0].event_name)
 
-        storage = await self.get_storage(
-            prefix=self.balance_prefix,
-            remove_prefix=True
-        )
+        storage = await self.get_storage(prefix=self.balance_prefix, remove_prefix=True)
 
         # test we emitted the correct transfer event
         event = Nep17TransferEvent.from_notification(notifications[0])
@@ -141,7 +135,9 @@ class Nep17ContractTest(SmartContractTestCase):
         user2_balance_key = self.user2.script_hash.to_array()
         self.assertNotIn(user1_balance_key, storage)
         self.assertIn(user2_balance_key, storage)
-        self.assertEqual(types.BigInteger(user1_balance).to_array(), storage[user2_balance_key])
+        self.assertEqual(
+            types.BigInteger(user1_balance).to_array(), storage[user2_balance_key]
+        )
 
     async def test_onnep17(self):
         with self.assertRaises(AbortException) as context:

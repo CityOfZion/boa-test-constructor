@@ -3,6 +3,7 @@ import unittest
 import asyncio
 import signal
 import re
+import inspect
 from typing import Optional, TypeVar, Type, cast, Sequence
 from neo3.core import types, cryptography
 from neo3.wallet import account
@@ -30,15 +31,13 @@ class AbortException(Exception):
 
 
 # TODO: include ability to read gas consumption
-# TODO: add ability to provide witness for call()
 # TODO: see how to test check_witness
 
 T = TypeVar("T")
 
 
 class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
-    # TODO: make configurable
-    node: Node = NeoGoNode("resources/protocol.unittest.yml")
+    node: Node
     contract_hash: types.UInt160
 
     async def asyncSetUp(self) -> None:
@@ -53,6 +52,8 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.node = NeoGoNode()
+        # these are called in reverse order
         cls.addClassCleanup(cls.node.reset)
         cls.addClassCleanup(cls.node.stop)
 
@@ -61,14 +62,13 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             cls.node.reset()
 
         signal.signal(signal.SIGINT, cleanup)
-
         cls.node.start()
 
     @classmethod
     async def call(
         cls,
         method: str,
-        args: list = None,
+        args: Optional[list] = None,
         *,
         return_type: Type[T],
         signing_accounts: Optional[Sequence[account.Account]] = None,
@@ -131,36 +131,34 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             exec_result = receipt.result
             notifications = receipt.notifications
         else:
-            receipt = await facade.test_invoke(
+            receipt_ = await facade.test_invoke(
                 contract.call_function(method, args), signers=signers
             )
-            cls._check_vmstate(receipt)
-            exec_result = receipt
-            receipt.notifications = cast(
-                noderpc.ExecutionResultResponse, receipt.notifications
-            )
-            notifications = receipt.notifications
+            cls._check_vmstate(receipt_)
+            exec_result = receipt_
+            notifications = receipt_.notifications
 
+        # Can't seem to get mypy to understand the return type of the first element in the tuple
         if return_type is str:
-            return unwrap.as_str(exec_result), notifications
+            return unwrap.as_str(exec_result), notifications  # type: ignore
         elif return_type is int:
-            return unwrap.as_int(exec_result), notifications
+            return unwrap.as_int(exec_result), notifications  # type: ignore
         elif return_type is bool:
-            return unwrap.as_bool(exec_result), notifications
+            return unwrap.as_bool(exec_result), notifications  # type: ignore
         elif return_type is dict:
-            return unwrap.as_dict(exec_result), notifications
+            return unwrap.as_dict(exec_result), notifications  # type: ignore
         elif return_type is list:
-            return unwrap.as_list(exec_result), notifications
+            return unwrap.as_list(exec_result), notifications  # type: ignore
         elif return_type is types.UInt160:
-            return unwrap.as_uint160(exec_result), notifications
+            return unwrap.as_uint160(exec_result), notifications  # type: ignore
         elif return_type is types.UInt256:
-            return unwrap.as_uint256(exec_result), notifications
+            return unwrap.as_uint256(exec_result), notifications  # type: ignore
         elif return_type is bytes:
-            return unwrap.as_bytes(exec_result), notifications
+            return unwrap.as_bytes(exec_result), notifications  # type: ignore
         elif return_type is cryptography.ECPoint:
-            return unwrap.as_public_key(exec_result), notifications
+            return unwrap.as_public_key(exec_result), notifications  # type: ignore
         elif return_type is None:
-            return unwrap.as_none(exec_result), notifications
+            return unwrap.as_none(exec_result), notifications  # type: ignore
         else:
             raise ValueError(f"unsupported return_type: {return_type}")
 
@@ -168,15 +166,18 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
     async def deploy(
         cls, path_to_nef: str, signing_account: account.Account
     ) -> types.UInt160:
-        nef_path = pathlib.Path(path_to_nef)
+        # fix relative path resolving by looking up the call stack because the test might not get started from
+        # the working directory that defines the tests e.g. when using `unittest discover`
+        frame = inspect.stack()[1]
+        nef_path = pathlib.Path(frame.filename).parent.joinpath(path_to_nef)
         if not nef_path.is_file() or not nef_path.suffix == ".nef":
             raise ValueError("invalid contract path specified")
         _nef = nef.NEF.from_file(str(nef_path.absolute()))
 
-        manifest_path = path_to_nef.replace(".nef", ".manifest.json")
+        manifest_path = nef_path.with_suffix("").with_suffix(".manifest.json")
         if not pathlib.Path(manifest_path).is_file():
             raise ValueError(f"can't find manifest at {manifest_path}")
-        _manifest = manifest.ContractManifest.from_file(manifest_path)
+        _manifest = manifest.ContractManifest.from_file(str(manifest_path))
 
         if signing_account.is_multisig:
             sign_pair = (
@@ -204,7 +205,6 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         signing_account: Optional[account.Account] = None,
         system_fee: int = 0,
     ) -> tuple[bool, list[noderpc.Notification]]:
-
         contract = NEP17Contract(token)
         if signing_account is None:
             signing_account = cls.node.account_committee
@@ -239,10 +239,10 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
     @classmethod
     async def get_storage(
         cls,
-        prefix: bytes = None,
+        prefix: Optional[bytes] = None,
         *,
         target_contract: Optional[types.UInt160] = None,
-        remove_prefix: bool = False
+        remove_prefix: bool = False,
     ) -> dict[bytes, bytes]:
         """
         Gets the entries in the storage of the contract specified by `contract_hash`

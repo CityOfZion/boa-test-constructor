@@ -4,7 +4,10 @@ from boa3.builtin.compile_time import NeoMetadata, metadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.blockchain import Transaction
-from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
+from boa3.builtin.interop.contract import (
+    GAS as GAS_SCRIPT,
+    call_contract,
+)
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160, helper as type_helper
 
@@ -23,7 +26,9 @@ def manifest_metadata() -> NeoMetadata:
     meta.supported_standards = ["NEP-17"]
     meta.add_permission(methods=["onNEP17Payment"])
 
-    meta.author = "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
+    meta.author = (
+        "Mirella Medeiros, Ricardo Prado and Lucas Uezu. COZ in partnership with Simpli"
+    )
     meta.description = "NEP-17 Example"
     meta.email = "contact@coz.io"
     return meta
@@ -46,7 +51,9 @@ TOKEN_SYMBOL = "NEP17"
 TOKEN_DECIMALS = 8
 
 # Total Supply of tokens in the system
-TOKEN_TOTAL_SUPPLY = 10_000_000 * 10**TOKEN_DECIMALS  # 10m total supply * 10^8 (decimals)
+TOKEN_TOTAL_SUPPLY = (
+    10_000_000 * 10**TOKEN_DECIMALS
+)  # 10m total supply * 10^8 (decimals)
 
 # Value of this NEP-17 token corresponds to NEO
 AMOUNT_PER_NEO = 10
@@ -122,7 +129,9 @@ def balance_of(account: UInt160) -> int:
 
 
 @public
-def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any) -> bool:
+def transfer(
+    from_address: UInt160, to_address: UInt160, amount: int, data: Any
+) -> bool:
     """
     Transfers an amount of NEP17 tokens from one account to another
 
@@ -176,7 +185,12 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     return True
 
 
-def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], amount: int, data: Any):
+def post_transfer(
+    from_address: Union[UInt160, None],
+    to_address: Union[UInt160, None],
+    amount: int,
+    data: Any,
+):
     """
     Checks if the one receiving NEP17 tokens is a smart contract and if it's one the onPayment method will be called
 

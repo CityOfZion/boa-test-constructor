@@ -3,7 +3,8 @@ import requests
 import platform
 import os
 import stat
-import sys
+import pathlib
+from importlib import machinery
 from tomlkit import parse
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -52,7 +53,11 @@ def main():
                         end="",
                     )
 
-                    binary_filename = f"{os.path.dirname(sys.argv[0])}/neogo"
+                    module_path = (
+                        machinery.PathFinder().find_spec("boaconstructor").origin
+                    )
+                    data_dir = pathlib.Path(module_path).parent.joinpath("data")
+                    binary_filename = f"{data_dir}/neogo"
                     if system == "windows":
                         binary_filename += ".exe"
 
