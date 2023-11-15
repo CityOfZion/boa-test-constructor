@@ -15,6 +15,9 @@ from wheel.cli.tags import tags
 
 def main(wheel_dir):
     platform_tag = sysconfig.get_platform().replace("-", "_").replace(".", "_")
+    # PyPi rejects non-manylinux wheels. Change the tag according to PEP-513
+    if platform_tag.startswith("linux"):
+        platform_tag = platform_tag.replace("linux", "manylinux1")
     for f in pathlib.Path(wheel_dir).glob("**/*"):
         if f.name.endswith("any.whl"):
             tags(str(f.absolute()), None, None, platform_tag, None, True)
