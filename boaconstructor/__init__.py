@@ -19,7 +19,7 @@ from neo3.contracts import nef, manifest
 from dataclasses import dataclass
 from boaconstructor.node import NeoGoNode, Node
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 ASSERT_REASON = re.compile(r".*Reason: (.*)")
 
