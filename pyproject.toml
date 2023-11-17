@@ -47,7 +47,7 @@ tag = "v0.102.0"
 check_untyped_defs = true
 
 [tool.bumpversion]
-current_version = "0.1.1"
+current_version = "0.1.2"
 commit = true
 tag = true
 
