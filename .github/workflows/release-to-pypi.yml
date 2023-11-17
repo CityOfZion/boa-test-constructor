@@ -69,7 +69,7 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          twine upload boatest/dist/*
+          twine upload boatest/dist/*.whl
       - if: github.event.inputs.pypi-target == 'Test'
         name: Publish to Test-PyPi
         env:
