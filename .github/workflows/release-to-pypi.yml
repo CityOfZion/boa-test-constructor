@@ -60,7 +60,7 @@ jobs:
           name: Draft
           draft: true
           files: |
-            boatest/dist/*
+            boatest/dist/*.whl
         env:
           GITHUB_TOKEN: ${{ secrets.deploy }}
       - if: github.event.inputs.pypi-target == 'Main' || github.event_name == 'push'
