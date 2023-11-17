@@ -1,2 +1,3 @@
-graft boaconstructor/
+graft boaconstructor/*
+include boaconstructor/neogo.exe
 global-exclude *.py[cod]
