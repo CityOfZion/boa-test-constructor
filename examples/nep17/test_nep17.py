@@ -70,9 +70,8 @@ class Nep17ContractTest(SmartContractTestCase):
             signing_account=self.user1,
         )
         self.assertTrue(success)
-
-        storage = await self.get_storage(prefix=self.balance_prefix, remove_prefix=True)
-
+        from boaconstructor import storage as stor
+        storage = await self.get_storage(prefix=self.balance_prefix, key_post_processor=stor.as_uint160)
         result, _ = await self.call(
             "balanceOf", [self.user1.script_hash], return_type=int
         )

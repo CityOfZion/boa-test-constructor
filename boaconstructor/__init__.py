@@ -4,7 +4,7 @@ import asyncio
 import signal
 import re
 import inspect
-from typing import Optional, TypeVar, Type, cast, Sequence
+from typing import Optional, TypeVar, Type, cast, Sequence, Callable, ParamSpec, Concatenate
 from neo3.core import types, cryptography
 from neo3.wallet import account
 from neo3.api.wrappers import GenericContract, NEP17Contract, ChainFacade
@@ -23,6 +23,7 @@ __version__ = "0.1.3"
 
 ASSERT_REASON = re.compile(r".*Reason: (.*)")
 
+P = ParamSpec('P')
 
 class AssertException(Exception):
     pass
@@ -245,6 +246,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         *,
         target_contract: Optional[types.UInt160] = None,
         remove_prefix: bool = False,
+        key_post_processor: Optional[Callable[[bytes, Optional[P]], T]] = None
     ) -> dict[bytes, bytes]:
         """
         Gets the entries in the storage of the contract specified by `contract_hash`
@@ -253,6 +255,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             prefix: prefix to filter the entries in the storage. Return the entire storage if not set.
             target_contract: gets the storage of a different contract than the one under test. e.g. NeoToken
             remove_prefix: whether the prefix should be removed from the output keys. False by default.
+            key_post_processor: a function to post process the storage key before placing it in the dictionary
         """
         if target_contract is None:
             contract = GenericContract(cls.contract_hash)
@@ -266,9 +269,10 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
             async for k, v in rpc_client.find_states(contract.hash, prefix):
                 if remove_prefix:
-                    results[k.removeprefix(prefix)] = v
-                else:
-                    results[k] = v
+                    k = k.removeprefix(prefix)
+                if key_post_processor is not None:
+                    k = key_post_processor(k)
+                results[k] = v
 
         return results
 
