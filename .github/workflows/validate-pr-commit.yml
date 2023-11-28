@@ -46,14 +46,16 @@ jobs:
       - if: matrix.os != 'windows-latest'
         name: fetch neo-go for Unix
         run: |
-          cd boatest/scripts
+          cd boatest
           source venv/bin/activate
+          cd scripts
           python download-node.py
       - if: matrix.os == 'windows-latest'
         name: fetch neo-go for Windows
         run: |
-          cd boatest/scripts
+          cd boatest
           venv/Scripts/activate
+          cd scripts
           python download-node.py
       - name: prep for persist
         run: tar -czf boatest.tar.gz boatest
