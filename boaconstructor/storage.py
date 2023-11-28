@@ -1,9 +1,18 @@
 from neo3.core import types, cryptography
 from neo3.wallet import utils as walletutils
 from neo3.wallet.types import NeoAddress
+from typing_extensions import Protocol
+from typing import Any, TypeVar
+
+T = TypeVar('T')
 
 
-def as_uint160(data: bytes, *args) -> types.UInt160:
+class PostProcessor(Protocol):
+    def __call__(self, data: bytes, *args: Any) -> Any:
+        ...
+
+
+def as_uint160(data: bytes, *_: Any) -> types.UInt160:
     """
     Convert the data to a UInt160
 
@@ -13,7 +22,7 @@ def as_uint160(data: bytes, *args) -> types.UInt160:
     return types.UInt160(data)
 
 
-def as_uint256(data: bytes) -> types.UInt256:
+def as_uint256(data: bytes, *_: Any) -> types.UInt256:
     """
     Convert the data to a UInt256
 
@@ -23,21 +32,21 @@ def as_uint256(data: bytes) -> types.UInt256:
     return types.UInt256(data)
 
 
-def as_int(data: bytes) -> int:
+def as_int(data: bytes, *_: Any) -> int:
     """
     Convert the data to an integer
     """
     return int(types.BigInteger(data))
 
 
-def as_str(data: bytes) -> str:
+def as_str(data: bytes, *_: Any) -> str:
     """
     Convert the data to a UTF-8 encoded string
     """
     return data.decode()
 
 
-def as_address(data: bytes) -> NeoAddress:
+def as_address(data: bytes, *_: Any) -> NeoAddress:
     """
     Convert the data to a Neo address string
 
@@ -47,7 +56,7 @@ def as_address(data: bytes) -> NeoAddress:
     return walletutils.script_hash_to_address(types.UInt160(data))
 
 
-def as_public_key(data: bytes) -> cryptography.ECPoint:
+def as_public_key(data: bytes, *_: Any) -> cryptography.ECPoint:
     """
     Convert the data to a public key
 

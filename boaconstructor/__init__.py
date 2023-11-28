@@ -4,7 +4,7 @@ import asyncio
 import signal
 import re
 import inspect
-from typing import Optional, TypeVar, Type, cast, Sequence, Callable, ParamSpec, Concatenate
+from typing import Optional, TypeVar, Type, cast, Sequence
 from neo3.core import types, cryptography
 from neo3.wallet import account
 from neo3.api.wrappers import GenericContract, NEP17Contract, ChainFacade
@@ -18,12 +18,12 @@ from neo3.api.helpers import unwrap
 from neo3.contracts import nef, manifest
 from dataclasses import dataclass
 from boaconstructor.node import NeoGoNode, Node
+from boaconstructor.storage import PostProcessor
 
 __version__ = "0.1.3"
 
 ASSERT_REASON = re.compile(r".*Reason: (.*)")
 
-P = ParamSpec('P')
 
 class AssertException(Exception):
     pass
@@ -246,7 +246,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         *,
         target_contract: Optional[types.UInt160] = None,
         remove_prefix: bool = False,
-        key_post_processor: Optional[Callable[[bytes, Optional[P]], T]] = None
+        key_post_processor: Optional[PostProcessor] = None
     ) -> dict[bytes, bytes]:
         """
         Gets the entries in the storage of the contract specified by `contract_hash`
