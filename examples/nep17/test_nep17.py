@@ -4,11 +4,13 @@ from boaconstructor import (
     AssertException,
     SmartContractTestCase,
     Nep17TransferEvent,
+    storage as _storage,
 )
 from neo3.api.wrappers import NEP17Contract
 from neo3.wallet import account
 from neo3.core import types
 from neo3.contracts.contract import CONTRACT_HASHES
+from typing import cast
 
 NEO = CONTRACT_HASHES.NEO_TOKEN
 GAS = CONTRACT_HASHES.GAS_TOKEN
@@ -19,6 +21,7 @@ class Nep17ContractTest(SmartContractTestCase):
     user1: account.Account
     user2: account.Account
     balance_prefix: bytes = b"b"
+    contract: NEP17Contract
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -34,7 +37,7 @@ class Nep17ContractTest(SmartContractTestCase):
 
     @classmethod
     async def asyncSetupClass(cls) -> None:
-        cls.genesis = cls.node.wallet.account_get_by_label("committee")
+        cls.genesis = cls.node.wallet.account_get_by_label("committee")  # type: ignore
         cls.contract_hash = await cls.deploy("./resources/nep17.nef", cls.genesis)
         cls.contract = NEP17Contract(cls.contract_hash)
         await cls.transfer(GAS, cls.genesis.script_hash, cls.user1.script_hash, 100)
@@ -70,13 +73,19 @@ class Nep17ContractTest(SmartContractTestCase):
             signing_account=self.user1,
         )
         self.assertTrue(success)
-        from boaconstructor import storage as stor
-        storage = await self.get_storage(prefix=self.balance_prefix, key_post_processor=stor.as_uint160)
+        storage = cast(
+            dict[types.UInt160, bytes],
+            await self.get_storage(
+                prefix=self.balance_prefix,
+                remove_prefix=True,
+                key_post_processor=_storage.as_uint160,
+            ),
+        )
         result, _ = await self.call(
             "balanceOf", [self.user1.script_hash], return_type=int
         )
         self.assertEqual(expected, result)
-        balance_key = self.user1.script_hash.to_array()
+        balance_key = self.user1.script_hash
         self.assertIn(balance_key, storage)
         self.assertEqual(types.BigInteger(expected).to_array(), storage[balance_key])
 
@@ -85,7 +94,7 @@ class Nep17ContractTest(SmartContractTestCase):
         unknown_account = types.UInt160(b"\x01" * 20)
         result, _ = await self.call("balanceOf", [unknown_account], return_type=int)
         self.assertEqual(expected, result)
-        balance_key = unknown_account.to_array()
+        balance_key = unknown_account
         self.assertNotIn(balance_key, storage)
 
         # now test invalid account
@@ -115,7 +124,14 @@ class Nep17ContractTest(SmartContractTestCase):
         self.assertEqual(1, len(notifications))
         self.assertEqual("Transfer", notifications[0].event_name)
 
-        storage = await self.get_storage(prefix=self.balance_prefix, remove_prefix=True)
+        storage = cast(
+            dict[types.UInt160, bytes],
+            await self.get_storage(
+                prefix=self.balance_prefix,
+                remove_prefix=True,
+                key_post_processor=_storage.as_uint160,
+            ),
+        )
 
         # test we emitted the correct transfer event
         event = Nep17TransferEvent.from_notification(notifications[0])
@@ -130,12 +146,10 @@ class Nep17ContractTest(SmartContractTestCase):
         self.assertEqual(user1_balance, user2_balance)
 
         # test storage updates
-        user1_balance_key = self.user1.script_hash.to_array()
-        user2_balance_key = self.user2.script_hash.to_array()
-        self.assertNotIn(user1_balance_key, storage)
-        self.assertIn(user2_balance_key, storage)
+        self.assertNotIn(self.user1.script_hash, storage)
+        self.assertIn(self.user2.script_hash, storage)
         self.assertEqual(
-            types.BigInteger(user1_balance).to_array(), storage[user2_balance_key]
+            types.BigInteger(user1_balance).to_array(), storage[self.user2.script_hash]
         )
 
     async def test_onnep17(self):

@@ -4,7 +4,7 @@ import asyncio
 import signal
 import re
 import inspect
-from typing import Optional, TypeVar, Type, cast, Sequence
+from typing import Optional, TypeVar, Type, Sequence
 from neo3.core import types, cryptography
 from neo3.wallet import account
 from neo3.api.wrappers import GenericContract, NEP17Contract, ChainFacade
@@ -246,7 +246,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         *,
         target_contract: Optional[types.UInt160] = None,
         remove_prefix: bool = False,
-        key_post_processor: Optional[PostProcessor] = None
+        key_post_processor: Optional[PostProcessor] = None,
     ) -> dict[bytes, bytes]:
         """
         Gets the entries in the storage of the contract specified by `contract_hash`
