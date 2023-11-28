@@ -4,7 +4,6 @@ import platform
 import os
 import stat
 import pathlib
-from importlib import machinery
 from tomlkit import parse
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -52,11 +51,9 @@ def main():
                         f"Found release! Downloading {asset['browser_download_url']}...",
                         end="",
                     )
-
-                    module_path = (
-                        machinery.PathFinder().find_spec("boaconstructor").origin
+                    data_dir = pathlib.Path(__file__).parent.parent.joinpath(
+                        "boaconstructor/data"
                     )
-                    data_dir = pathlib.Path(module_path).parent.joinpath("data")
                     binary_filename = f"{data_dir}/neogo"
                     if system == "windows":
                         binary_filename += ".exe"
