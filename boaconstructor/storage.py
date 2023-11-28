@@ -2,9 +2,7 @@ from neo3.core import types, cryptography
 from neo3.wallet import utils as walletutils
 from neo3.wallet.types import NeoAddress
 from typing_extensions import Protocol
-from typing import Any, TypeVar
-
-T = TypeVar('T')
+from typing import Any
 
 
 class PostProcessor(Protocol):
@@ -64,4 +62,3 @@ def as_public_key(data: bytes, *_: Any) -> cryptography.ECPoint:
         data: a serialized compressed public key
     """
     return cryptography.ECPoint.deserialize_from_bytes(data)
-
