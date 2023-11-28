@@ -44,19 +44,21 @@ jobs:
           venv\Scripts\activate
           pip install -e .[dev]
       - if: matrix.os != 'windows-latest'
-        name: fetch neo-go for Unix
+        name: build patched neo-go for Unix
         run: |
-          cd boatest
-          source venv/bin/activate
-          cd scripts
-          python download-node.py
+          git clone https://github.com/ixje/neo-go.git
+          cd neo-go
+          git checkout tags/v0.104.0
+          make
+          mv bin/neo-go ../boatest/boaconstructor/data/neogo
       - if: matrix.os == 'windows-latest'
-        name: fetch neo-go for Windows
+        name: build patched neo-go for Windows
         run: |
-          cd boatest
-          venv/Scripts/activate
-          cd scripts
-          python download-node.py
+          git clone https://github.com/ixje/neo-go.git
+          cd neo-go
+          git checkout tags/v0.104.0
+          make
+          mv bin/neo-go.exe ../boatest/boaconstructor/data/neogo.exe
       - name: prep for persist
         run: tar -czf boatest.tar.gz boatest
       - name: persist
