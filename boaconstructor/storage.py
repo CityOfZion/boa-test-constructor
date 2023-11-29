@@ -1,3 +1,7 @@
+"""
+Common post processor functions for the get_storage() method.
+"""
+
 from neo3.core import types, cryptography
 from neo3.wallet import utils as walletutils
 from neo3.wallet.types import NeoAddress
