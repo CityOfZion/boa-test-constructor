@@ -247,6 +247,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         target_contract: Optional[types.UInt160] = None,
         remove_prefix: bool = False,
         key_post_processor: Optional[PostProcessor] = None,
+        values_post_processor: Optional[PostProcessor] = None,
     ) -> dict[bytes, bytes]:
         """
         Gets the entries in the storage of the contract specified by `contract_hash`
@@ -255,7 +256,8 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             prefix: prefix to filter the entries in the storage. Return the entire storage if not set.
             target_contract: gets the storage of a different contract than the one under test. e.g. NeoToken
             remove_prefix: whether the prefix should be removed from the output keys. False by default.
-            key_post_processor: a function to post process the storage key before placing it in the dictionary
+            key_post_processor: a function to post process the storage key before placing it in the dictionary.
+            values_post_processor: a function to post process the storage value before placing it in the dictionary.
         """
         if target_contract is None:
             contract = GenericContract(cls.contract_hash)
@@ -272,6 +274,8 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
                     k = k.removeprefix(prefix)
                 if key_post_processor is not None:
                     k = key_post_processor(k)
+                if values_post_processor is not None:
+                    v = values_post_processor(v)
                 results[k] = v
 
         return results
