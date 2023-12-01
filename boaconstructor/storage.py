@@ -5,6 +5,7 @@ Common post processor functions for the get_storage() method.
 from neo3.core import types, cryptography
 from neo3.wallet import utils as walletutils
 from neo3.wallet.types import NeoAddress
+from neo3.api.helpers import stdlib
 from typing_extensions import Protocol
 from typing import Any
 
@@ -66,3 +67,13 @@ def as_public_key(data: bytes, *_: Any) -> cryptography.ECPoint:
         data: a serialized compressed public key
     """
     return cryptography.ECPoint.deserialize_from_bytes(data)
+
+
+def stdlib_deserialize(data: bytes, *_: Any) -> Any:
+    """
+    Deserialize the data using the Binary Deserialize logic of the StdLib native contract
+
+    Args:
+        data: data that has been serialized using the StdLib native contract binary serialize method
+    """
+    return stdlib.binary_deserialize(data)
