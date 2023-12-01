@@ -20,6 +20,7 @@ class AmmContractTest(SmartContractTestCase):
     zgas_contract: GenericContract
     zneo_contract_hash: types.UInt160
     zneo_contract: GenericContract
+    contract: GenericContract
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -35,7 +36,7 @@ class AmmContractTest(SmartContractTestCase):
 
     @classmethod
     async def asyncSetupClass(cls) -> None:
-        cls.genesis = cls.node.wallet.account_get_by_label("committee")
+        cls.genesis = cls.node.wallet.account_get_by_label("committee")  # type: ignore
 
         await cls.transfer(GAS, cls.genesis.script_hash, cls.owner.script_hash, 100)
         await cls.transfer(GAS, cls.genesis.script_hash, cls.user.script_hash, 100)
@@ -338,7 +339,7 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(1, len(transfer_events))
         self.assertEqual(3, len(transfer_events[0].state.as_list()))
         sender, receiver, amount = transfer_events[0].state.as_list()
-        self.assertEqual(None, sender.as_none())
+        self.assertIsNone(sender.as_none())
         self.assertEqual(self.user.script_hash, receiver.as_uint160())
         self.assertEqual(liquidity, amount.as_int())
 
@@ -434,7 +435,7 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(1, len(transfer_events))
         self.assertEqual(3, len(transfer_events[0].state.as_list()))
         sender, receiver, amount = transfer_events[0].state.as_list()
-        self.assertEqual(None, sender.as_none())
+        self.assertIsNone(sender.as_none())
         self.assertEqual(self.user.script_hash, receiver.as_uint160())
         self.assertEqual(liquidity, amount.as_int())
 
@@ -638,7 +639,7 @@ class AmmContractTest(SmartContractTestCase):
         self.assertEqual(3, len(transfer_events[0].state.as_list()))
         sender, receiver, amount = transfer_events[0].state.as_list()
         self.assertEqual(self.user.script_hash, sender.as_uint160())
-        self.assertEqual(None, receiver.as_none())
+        self.assertIsNone(receiver.as_none())
         self.assertEqual(liquidity, amount.as_int())
 
         self.assertEqual(1, len(sync_events))
