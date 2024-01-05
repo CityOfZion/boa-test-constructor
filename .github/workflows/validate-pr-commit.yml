@@ -46,14 +46,14 @@ jobs:
       - if: matrix.os != 'windows-latest'
         name: fetch neo-go for Unix
         run: |
-          cd boa-test
+          cd boatest
           source venv/bin/activate
           cd scripts
           python download-node.py
       - if: matrix.os == 'windows-latest'
         name: fetch neo-go for Windows
         run: |
-          cd boa-test
+          cd boatest
           venv/Scripts/activate
           cd scripts
           python download-node.py
