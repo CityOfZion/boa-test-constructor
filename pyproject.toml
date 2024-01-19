@@ -5,7 +5,7 @@ description = """This project provides a unittest class for testing NEO3 Blockch
        It includes all necessary dependencies like a staic binary of a neo-go node to run tests against.
        """
 readme = "README.rst"
-requires-python = ">=3.10,<=3.12"
+requires-python = ">=3.11,<=3.13"
 license = {file = "LICENSE.rst"}
 keywords = ["NEO3", "Blockchain", "unit test"]
 authors = [
@@ -15,7 +15,7 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
-   "neo-mamba==2.4.0",
+   "neo-mamba==2.5.0",
    "PyYAML"
 ]
 
@@ -38,10 +38,10 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-target-version = ['py310']
+target-version = ['py311']
 
 [tool.neogo]
-tag = "v0.105.0"
+tag = "v0.105.1"
 
 [tool.mypy]
 check_untyped_defs = true

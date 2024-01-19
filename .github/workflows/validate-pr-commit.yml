@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-20.04, windows-latest, macos-latest ]
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.11", "3.12"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -81,11 +81,11 @@ jobs:
       - name: restore artifact
         uses: actions/download-artifact@v3
         with:
-          name: setup-artifact-ubuntu-20.04-py3.10
-      - name: Set up Python 3.10
+          name: setup-artifact-ubuntu-20.04-py3.11
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4.6.1
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           check-latest: true
       - name: extract & type check
         run: |
@@ -100,7 +100,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-20.04, windows-latest, macos-latest ]
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.11", "3.12"]
     steps:
       - name: restore artifact
         uses: actions/download-artifact@v3
