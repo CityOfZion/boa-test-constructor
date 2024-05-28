@@ -177,7 +177,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             raise ValueError("invalid contract path specified")
         _nef = nef.NEF.from_file(str(nef_path.absolute()))
 
-        manifest_path = nef_path.with_suffix("").with_suffix(".manifest.json")
+        manifest_path = nef_path.with_suffix(".manifest.json")
         if not pathlib.Path(manifest_path).is_file():
             raise ValueError(f"can't find manifest at {manifest_path}")
         _manifest = manifest.ContractManifest.from_file(str(manifest_path))
