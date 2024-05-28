@@ -1,4 +1,6 @@
 import logging
+from wsgiref import headers
+
 import requests
 import platform
 import os
@@ -30,6 +32,10 @@ def main():
         target_tag = doc["tool"]["neogo"]["tag"]
 
         r = requests.get("https://api.github.com/repos/nspcc-dev/neo-go/releases")
+        if r.status_code == 403:
+            raise Exception(
+                f"we probably execeeded the rate limit. Remaining: {r.headers['X-RateLimit-Remaining']}"
+            )
 
         for release in r.json():
             if release["tag_name"] != target_tag:
