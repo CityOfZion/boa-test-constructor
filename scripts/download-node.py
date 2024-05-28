@@ -1,6 +1,4 @@
 import logging
-from wsgiref import headers
-
 import requests
 import platform
 import os
