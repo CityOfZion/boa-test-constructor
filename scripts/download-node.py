@@ -30,11 +30,14 @@ def main():
         doc = parse(f.read())
         target_tag = doc["tool"]["neogo"]["tag"]
 
-        token = os.getenv('GITHUB_TOKEN')
+        token = os.getenv("GITHUB_TOKEN")
         if token is None:
             r = requests.get("https://api.github.com/repos/nspcc-dev/neo-go/releases")
         else:
-            r = requests.get("https://api.github.com/repos/nspcc-dev/neo-go/releases", headers={"authorization": f"Bearer {token}"})
+            r = requests.get(
+                "https://api.github.com/repos/nspcc-dev/neo-go/releases",
+                headers={"authorization": f"Bearer {token}"},
+            )
 
         if r.status_code == 403:
             raise Exception(
