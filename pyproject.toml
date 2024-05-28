@@ -21,7 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-   "black",
+   "black==23.9.1",
    "build==0.10.0",
    "bump-my-version==0.10.0",
    "mypy",
