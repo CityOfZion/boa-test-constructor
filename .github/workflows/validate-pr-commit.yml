@@ -45,6 +45,8 @@ jobs:
           pip install -e .[dev]
       - if: matrix.os != 'windows-latest'
         name: fetch neo-go for Unix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd boatest
           source venv/bin/activate
@@ -52,6 +54,8 @@ jobs:
           python download-node.py
       - if: matrix.os == 'windows-latest'
         name: fetch neo-go for Windows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd boatest
           venv/Scripts/activate

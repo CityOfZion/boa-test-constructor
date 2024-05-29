@@ -30,20 +30,21 @@ def main():
         doc = parse(f.read())
         target_tag = doc["tool"]["neogo"]["tag"]
 
+        headers = None
         token = os.getenv("GITHUB_TOKEN")
-        if token is None:
-            r = requests.get("https://api.github.com/repos/nspcc-dev/neo-go/releases")
-        else:
-            r = requests.get(
-                "https://api.github.com/repos/nspcc-dev/neo-go/releases",
-                headers={"authorization": f"Bearer {token}"},
-            )
+        if token is not None:
+            headers = {"authorization": f"Bearer {token}"}
 
-        if r.status_code == 403:
+        r = requests.get(
+            "https://api.github.com/repos/nspcc-dev/neo-go/releases",
+            headers=headers,
+        )
+
+        if r.status_code != 200:
+            r2 = requests.get("https://api.github.com/rate_limit", headers=headers)
             raise Exception(
-                f"we probably execeeded the rate limit. Remaining: {r.headers['X-RateLimit-Remaining']}"
+                f"we probably execeeded the rate limit. Rate limit info: {r2.json()}"
             )
-
         for release in r.json():
             if release["tag_name"] != target_tag:
                 continue
