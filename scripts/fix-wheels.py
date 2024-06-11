@@ -10,6 +10,7 @@ the wheel hence this script.
 import sys
 import pathlib
 import sysconfig
+import platform
 from wheel.cli.tags import tags
 
 
@@ -18,6 +19,11 @@ def main(wheel_dir):
     # PyPi rejects non-manylinux wheels. Change the tag according to PEP-513
     if platform_tag.startswith("linux"):
         platform_tag = platform_tag.replace("linux", "manylinux1")
+    if platform_tag.startswith("macosx"):
+        if platform.machine().lower() == "x86_64":
+            platform_tag = platform_tag.replace("universal2", "x86_64")
+        else:
+            platform_tag = platform_tag.replace("universal2", "arm64")
     for f in pathlib.Path(wheel_dir).glob("**/*"):
         if f.name.endswith("any.whl"):
             tags(str(f.absolute()), None, None, platform_tag, None, True)
