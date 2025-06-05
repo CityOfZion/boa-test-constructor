@@ -13,6 +13,7 @@ from neo3.network.payloads.verification import Signer
 from neo3.api.helpers.signing import (
     sign_insecure_with_account,
     sign_insecure_with_multisig_account,
+    no_signing
 )
 from neo3.api.helpers import unwrap
 from neo3.contracts import nef, manifest
@@ -130,16 +131,16 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             receipt = await facade.invoke(
                 contract.call_function(method, args), signers=signing_pairs
             )
-            cls._check_vmstate(receipt)
-            exec_result = receipt.result
-            notifications = receipt.notifications
         else:
-            receipt_ = await facade.test_invoke(
-                contract.call_function(method, args), signers=signers
+            signing_pairs = None
+            if signers is not None:
+                signing_pairs = list(map(lambda s: (no_signing(), s), signers))
+            receipt = await facade.test_invoke(
+                contract.call_function(method, args), signers=signing_pairs
             )
-            cls._check_vmstate(receipt_)
-            exec_result = receipt_
-            notifications = receipt_.notifications
+        cls._check_vmstate(receipt)
+        exec_result = receipt.result
+        notifications = receipt.notifications
 
         # Can't seem to get mypy to understand the return type of the first element in the tuple
         if return_type is str:
