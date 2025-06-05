@@ -17,7 +17,7 @@ from neo3.api.helpers.signing import (
 from neo3.api.helpers import unwrap
 from neo3.contracts import nef, manifest
 from dataclasses import dataclass
-from boaconstructor.node import NeoGoNode, Node
+from boaconstructor.node import NeoGoNode
 from boaconstructor.storage import PostProcessor
 
 __version__ = "0.3.2"
@@ -40,7 +40,7 @@ T = TypeVar("T")
 
 
 class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
-    node: Node
+    node: NeoGoNode
     contract_hash: types.UInt160
 
     async def asyncSetUp(self) -> None:

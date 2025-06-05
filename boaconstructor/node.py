@@ -7,7 +7,6 @@ import sys
 import time
 import yaml
 import platform
-import abc
 from neo3.wallet import wallet, account
 from neo3.api.wrappers import ChainFacade
 from typing import Optional
@@ -16,28 +15,11 @@ log = logging.getLogger("neogo")
 log.addHandler(logging.StreamHandler(sys.stdout))
 
 
-class Node(abc.ABC):
+class NeoGoNode:
     wallet: wallet.Wallet
     account_committee: account.Account
     facade: ChainFacade
 
-    @classmethod
-    @abc.abstractmethod
-    def start(cls):
-        raise NotImplementedError
-
-    @classmethod
-    @abc.abstractmethod
-    def stop(cls):
-        raise NotImplementedError
-
-    @classmethod
-    @abc.abstractmethod
-    def reset(cls):
-        raise NotImplementedError
-
-
-class NeoGoNode(Node):
     def __init__(self, config_path: Optional[str] = None):
         self.data_dir = pathlib.Path(__file__).parent.joinpath("data")
         if config_path is None:
