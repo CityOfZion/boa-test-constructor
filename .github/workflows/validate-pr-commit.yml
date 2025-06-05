@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-latest, macos-latest, macos-13 ]
+        os: [ ubuntu-24.04, windows-latest, macos-latest, macos-13 ]
         python-version: ["3.11", "3.12"]
     steps:
       - name: Checkout code
@@ -64,15 +64,15 @@ jobs:
       - name: prep for persist
         run: tar -czf boatest.tar.gz boatest
       - name: persist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: setup-artifact-${{ matrix.os }}-py${{ matrix.python-version }}
           path: boatest.tar.gz
           retention-days: 1
   linting:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: psf/black@stable
         with:
           options: '--check --target-version py311'
@@ -80,12 +80,12 @@ jobs:
           src: "boaconstructor/ examples/ scripts/"
   type-checking:
     needs: setup
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: restore artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: setup-artifact-ubuntu-20.04-py3.11
+          name: setup-artifact-ubuntu-24.04-py3.11
       - name: Set up Python 3.11
         uses: actions/setup-python@v4.6.1
         with:
@@ -103,11 +103,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-latest, macos-latest, macos-13 ]
+        os: [ ubuntu-24.04, windows-latest, macos-latest, macos-13 ]
         python-version: ["3.11", "3.12"]
     steps:
       - name: restore artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: setup-artifact-${{ matrix.os }}-py${{ matrix.python-version }}
       - name: Set up Python ${{ matrix.python-version }}
