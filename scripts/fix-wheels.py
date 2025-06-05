@@ -22,8 +22,6 @@ def main(wheel_dir):
     if platform_tag.startswith("macosx"):
         if platform.machine().lower() == "x86_64":
             platform_tag = platform_tag.replace("universal2", "x86_64")
-        else:
-            platform_tag = platform_tag.replace("universal2", "arm64")
     for f in pathlib.Path(wheel_dir).glob("**/*"):
         if f.name.endswith("any.whl"):
             tags(str(f.absolute()), None, None, platform_tag, None, True)
