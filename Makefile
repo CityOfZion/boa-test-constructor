@@ -22,6 +22,7 @@ clean-test: ## remove test and coverage artifacts
 
 test: ## run tests quickly with the default Python
 	python -m unittest discover -v -s examples/
+	python -m unittest discover -v -s tests/
 
 type: ## perform static type checking using mypy
 	mypy boaconstructor/

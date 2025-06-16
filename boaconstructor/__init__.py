@@ -18,7 +18,7 @@ from neo3.api.helpers.signing import (
 from neo3.api.helpers import unwrap
 from neo3.contracts import nef, manifest
 from dataclasses import dataclass
-from boaconstructor.node import NeoGoNode
+from boaconstructor.node import NeoGoNode, RuntimeLog
 from boaconstructor.storage import PostProcessor
 
 __version__ = "0.5.2"
@@ -49,10 +49,15 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         # disable debug mode because it will warn about functions waiting longer than 0.1 seconds
         # which will be the case for all functions that persist state (e.g. transfer())
         asyncio.get_event_loop().set_debug(False)
+        self.node.runtime_logs = []
 
     @property
     def facade(self) -> ChainFacade:
         return self.node.facade
+
+    @property
+    def runtime_logs(self) -> list[RuntimeLog]:
+        return self.node.runtime_logs
 
     @classmethod
     def setUpClass(cls) -> None:
