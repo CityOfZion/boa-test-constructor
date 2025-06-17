@@ -18,10 +18,10 @@ from neo3.api.helpers.signing import (
 from neo3.api.helpers import unwrap
 from neo3.contracts import nef, manifest
 from dataclasses import dataclass
-from boaconstructor.node import NeoGoNode, Node
+from boaconstructor.node import NeoGoNode
 from boaconstructor.storage import PostProcessor
 
-__version__ = "0.3.0"
+__version__ = "0.3.3"
 
 ASSERT_REASON = re.compile(r".*Reason: (.*)")
 
@@ -41,7 +41,7 @@ T = TypeVar("T")
 
 
 class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
-    node: Node
+    node: NeoGoNode
     contract_hash: types.UInt160
 
     async def asyncSetUp(self) -> None:
@@ -178,7 +178,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
             raise ValueError("invalid contract path specified")
         _nef = nef.NEF.from_file(str(nef_path.absolute()))
 
-        manifest_path = nef_path.with_suffix("").with_suffix(".manifest.json")
+        manifest_path = nef_path.with_suffix(".manifest.json")
         if not pathlib.Path(manifest_path).is_file():
             raise ValueError(f"can't find manifest at {manifest_path}")
         _manifest = manifest.ContractManifest.from_file(str(manifest_path))

@@ -5,6 +5,7 @@ import os
 import stat
 import pathlib
 from tomlkit import parse
+import os
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -29,8 +30,21 @@ def main():
         doc = parse(f.read())
         target_tag = doc["tool"]["neogo"]["tag"]
 
-        r = requests.get("https://api.github.com/repos/nspcc-dev/neo-go/releases")
+        headers = None
+        token = os.getenv("GITHUB_TOKEN")
+        if token is not None:
+            headers = {"authorization": f"Bearer {token}"}
 
+        r = requests.get(
+            "https://api.github.com/repos/nspcc-dev/neo-go/releases",
+            headers=headers,
+        )
+
+        if r.status_code != 200:
+            r2 = requests.get("https://api.github.com/rate_limit", headers=headers)
+            raise Exception(
+                f"we probably execeeded the rate limit. Rate limit info: {r2.json()}"
+            )
         for release in r.json():
             if release["tag_name"] != target_tag:
                 continue
