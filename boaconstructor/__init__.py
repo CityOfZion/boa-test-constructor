@@ -11,9 +11,9 @@ from neo3.api.wrappers import GenericContract, NEP17Contract, ChainFacade
 from neo3.api import noderpc
 from neo3.network.payloads.verification import Signer
 from neo3.api.helpers.signing import (
-    sign_insecure_with_account,
-    sign_insecure_with_multisig_account,
-    no_signing
+    sign_with_account,
+    sign_with_multisig_account,
+    no_signing,
 )
 from neo3.api.helpers import unwrap
 from neo3.contracts import nef, manifest
@@ -114,20 +114,10 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
                     signer = signers[i]
                 if signing_account.is_multisig:
                     signing_pairs.append(
-                        (
-                            sign_insecure_with_multisig_account(
-                                signing_account, password="123"
-                            ),
-                            signer,
-                        )
+                        (sign_with_multisig_account(signing_account), signer)
                     )
                 else:
-                    signing_pairs.append(
-                        (
-                            sign_insecure_with_account(signing_account, password="123"),
-                            signer,
-                        )
-                    )
+                    signing_pairs.append((sign_with_account(signing_account), signer))
             receipt = await facade.invoke(
                 contract.call_function(method, args), signers=signing_pairs
             )
@@ -185,13 +175,13 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
         if signing_account.is_multisig:
             sign_pair = (
-                sign_insecure_with_multisig_account(signing_account, password="123"),
+                sign_with_multisig_account(signing_account),
                 Signer(signing_account.script_hash),
             )
 
         else:
             sign_pair = (
-                sign_insecure_with_account(signing_account, password="123"),
+                sign_with_account(signing_account),
                 Signer(signing_account.script_hash),
             )
         receipt = await cls.node.facade.invoke(
@@ -206,6 +196,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         source: types.UInt160,
         destination: types.UInt160,
         amount: int,
+        decimals: int,
         signing_account: Optional[account.Account] = None,
         system_fee: int = 0,
     ) -> tuple[bool, list[noderpc.Notification]]:
@@ -215,19 +206,19 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
 
         if signing_account.is_multisig:
             sign_pair = (
-                sign_insecure_with_multisig_account(signing_account, password="123"),
+                sign_with_multisig_account(signing_account),
                 Signer(signing_account.script_hash),
             )
 
         else:
             sign_pair = (
-                sign_insecure_with_account(signing_account, password="123"),
+                sign_with_account(signing_account),
                 Signer(signing_account.script_hash),
             )
 
         try:
             receipt = await cls.node.facade.invoke(
-                contract.transfer_friendly(source, destination, amount),
+                contract.transfer_friendly(source, destination, amount, decimals),
                 signers=[sign_pair],
                 system_fee=system_fee,
             )
