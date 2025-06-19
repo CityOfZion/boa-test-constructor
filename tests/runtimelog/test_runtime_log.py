@@ -1,6 +1,7 @@
 import asyncio
 from boaconstructor import SmartContractTestCase
 from neo3.wallet import account
+from neo3.network.payloads.verification import Signer
 
 
 class RuntimeLogTest(SmartContractTestCase):
@@ -13,7 +14,7 @@ class RuntimeLogTest(SmartContractTestCase):
 
     @classmethod
     async def asyncSetupClass(cls) -> None:
-        cls.genesis = cls.node.wallet.account_get_by_label("committee")  # type: ignore
+        cls.genesis = cls.node.wallet.account_get_by_label("committee")
         cls.contract_hash = await cls.deploy("resources/runtimelog_contract.nef", cls.genesis)
 
     async def test_main1(self):
@@ -24,7 +25,9 @@ class RuntimeLogTest(SmartContractTestCase):
         self.assertEqual(msg, self.runtime_logs[0].msg)
 
     async def test_main2(self):
+        """validate that notifications are reset between test cases"""
         msg = "msg2"
         await self.call("main", [msg], return_type=None)
         self.assertEqual(1, len(self.runtime_logs))
+        self.assertEqual(self.contract_hash, self.runtime_logs[0].contract)
         self.assertEqual(msg, self.runtime_logs[0].msg)
