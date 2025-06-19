@@ -31,3 +31,10 @@ class RuntimeLogTest(SmartContractTestCase):
         self.assertEqual(1, len(self.runtime_logs))
         self.assertEqual(self.contract_hash, self.runtime_logs[0].contract)
         self.assertEqual(msg, self.runtime_logs[0].msg)
+
+    async def test_with_peristed_tx(self):
+        msg = "msg3"
+        await self.call("main", [msg], return_type=None, signing_accounts=[self.genesis], signers=[Signer(self.genesis.script_hash)])
+        self.assertEqual(1, len(self.runtime_logs))
+        self.assertEqual(self.contract_hash, self.runtime_logs[0].contract)
+        self.assertEqual(msg, self.runtime_logs[0].msg)

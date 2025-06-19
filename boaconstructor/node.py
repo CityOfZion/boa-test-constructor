@@ -76,11 +76,13 @@ class NeoGoNode:
 
         def process_stdout(process):
             for output in iter(process.stdout.readline, b""):
+                print(output)
                 if "RPC server already started" in output:
                     self._ready = True
                     # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
                     # we'll eventually hit the PIPE buffer limit and hang the child process.
                 if match := RE_RUNTIME_LOG.match(output):
+
                     txid = types.UInt256.from_string(match.group(1))
                     contract = types.UInt160.from_string(match.group(2))
                     msg = match.group(3)
