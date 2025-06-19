@@ -216,19 +216,19 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
                 Signer(signing_account.script_hash),
             )
 
-        try:
-            receipt = await cls.node.facade.invoke(
-                contract.transfer_friendly(source, destination, amount, decimals),
-                signers=[sign_pair],
-                system_fee=system_fee,
-            )
-        except ValueError as e:
-            if "ASSERT" in str(e):
-                raise AssertException(cls._get_assert_reason(str(e)))
-            elif "ABORT" in str(e):
-                raise AbortException(cls._get_assert_reason(str(e)))
+        receipt = await cls.node.facade.invoke(
+            contract.transfer_friendly(source, destination, amount, decimals),
+            signers=[sign_pair],
+            system_fee=system_fee,
+        )
+        if receipt.state == "FAULT":
+            exception = receipt.exception
+            if exception is not None and "ASSERT" in exception:
+                raise AssertException(cls._get_assert_reason(exception))
+            elif exception is not None and "ABORT" in exception:
+                raise AbortException(cls._get_assert_reason(exception))
             else:
-                raise e
+                raise ValueError(exception)
         return receipt.result, receipt.notifications
 
     @classmethod
