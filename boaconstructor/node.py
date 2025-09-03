@@ -22,6 +22,15 @@ RE_RUNTIME_LOG = re.compile(
     r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \"(.*?)\", \"msg\": \"(.*?)\""
 )
 
+STOP_MARKER = "STOP_RUNTIMELOG_CAPTURE"
+RE_CAPTURE_STOP_MARKER = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + STOP_MARKER + "\""
+)
+START_MARKER = "START_RUNTIMELOG_CAPTURE"
+RE_CAPTURE_START_MARKER = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + START_MARKER + "\""
+)
+
 
 @dataclass
 class RuntimeLog:
@@ -75,14 +84,18 @@ class NeoGoNode:
         )
 
         def process_stdout(process):
+            capture = True
             for output in iter(process.stdout.readline, b""):
                 print(output)
                 if "RPC server already started" in output:
                     self._ready = True
                     # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
                     # we'll eventually hit the PIPE buffer limit and hang the child process.
-                if match := RE_RUNTIME_LOG.match(output):
-
+                if RE_CAPTURE_STOP_MARKER.match(output) is not None:
+                    capture = False
+                if RE_CAPTURE_START_MARKER.match(output) is not None:
+                    capture = True
+                if (match := RE_RUNTIME_LOG.match(output)) is not None and capture:
                     txid = types.UInt256.from_string(match.group(1))
                     contract = types.UInt160.from_string(match.group(2))
                     msg = match.group(3)
