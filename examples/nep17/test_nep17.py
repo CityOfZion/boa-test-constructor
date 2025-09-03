@@ -26,8 +26,8 @@ class Nep17ContractTest(SmartContractTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.user1 = cls.node.wallet.account_new("123", "alice")
-        cls.user2 = cls.node.wallet.account_new("123", "bob")
+        cls.user1 = cls.node.wallet.account_new("alice")
+        cls.user2 = cls.node.wallet.account_new("bob")
         # Due to a lack of an asyncSetupClass we have to do it manually
         # Use this if you for example want to initialise some blockchain state
 
@@ -40,8 +40,8 @@ class Nep17ContractTest(SmartContractTestCase):
         cls.genesis = cls.node.wallet.account_get_by_label("committee")  # type: ignore
         cls.contract_hash = await cls.deploy("./resources/nep17.nef", cls.genesis)
         cls.contract = NEP17Contract(cls.contract_hash)
-        await cls.transfer(GAS, cls.genesis.script_hash, cls.user1.script_hash, 100)
-        await cls.transfer(GAS, cls.genesis.script_hash, cls.user2.script_hash, 100)
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.user1.script_hash, 100, 8)
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.user2.script_hash, 100, 8)
 
     async def test_symbol(self):
         expected = "NEP17"
@@ -70,6 +70,7 @@ class Nep17ContractTest(SmartContractTestCase):
             self.user1.script_hash,
             self.contract_hash,
             50,
+            8,
             signing_account=self.user1,
         )
         self.assertTrue(success)
@@ -159,6 +160,7 @@ class Nep17ContractTest(SmartContractTestCase):
                 self.genesis.script_hash,
                 self.contract_hash,
                 10,
+                0,
                 signing_account=self.genesis,
             )
         self.assertEqual("contract only accepts GAS", str(context.exception))

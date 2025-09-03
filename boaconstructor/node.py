@@ -93,29 +93,19 @@ class NeoGoNode:
             data = config["ApplicationConfiguration"]
 
             consensus_wallet_password = data["Consensus"]["UnlockWallet"]["Password"]
-            tmp_wallet = wallet.Wallet.from_file(
+            self.wallet = wallet.Wallet.from_file(
                 str(self.consensus_wallet_path.absolute()),
                 passwords=[
                     consensus_wallet_password,
                     consensus_wallet_password,
                 ],
             )
-            priv_key = account.Account.private_key_from_nep2(
-                tmp_wallet.account_default.encrypted_key,
-                consensus_wallet_password,
-                _scrypt_parameters=tmp_wallet.scrypt,
-            )
-            acc = account.Account.from_private_key(
-                priv_key, "123", scrypt_parameters=tmp_wallet.scrypt
-            )
-            acc.label = "committee-signature"
-            self.wallet = wallet.Wallet(scrypt_params=tmp_wallet.scrypt)
-            self.wallet.account_add(acc, is_default=True)
-
+            self.wallet.accounts[0].label = "committee-signature"
+            self.wallet.accounts[1].label = "committee"
+            self.account_committee = self.wallet.accounts[1]
             self.account_committee = self.wallet.import_multisig_address(
                 1, [self.wallet.account_default.public_key]  # type: ignore
             )
-            self.account_committee.label = "committee"
 
             # TODO: warn if port is :0 because then we can't tell where the RPC server is running on
             address = data["RPC"]["Addresses"][0]
