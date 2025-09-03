@@ -51,7 +51,7 @@ ApplicationConfiguration:
     MaxGasInvoke: 15
     Enabled: true
     Addresses:
-      - "localhost:30222"
+      - "127.0.0.1:30222"
     EnableCORSWorkaround: false
   Prometheus:
     Enabled: false #since it's not useful for unit tests.
