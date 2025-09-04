@@ -7,18 +7,34 @@ import sys
 import time
 import yaml
 import platform
+import re
+from neo3.core import types
 from neo3.wallet import wallet, account
 from neo3.api.wrappers import ChainFacade
 from typing import Optional
+from dataclasses import dataclass
+
 
 log = logging.getLogger("neogo")
 log.addHandler(logging.StreamHandler(sys.stdout))
+
+RE_RUNTIME_LOG = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \"(.*?)\", \"msg\": \"(.*?)\""
+)
+
+
+@dataclass
+class RuntimeLog:
+    txid: types.UInt256
+    contract: types.UInt160
+    msg: str
 
 
 class NeoGoNode:
     wallet: wallet.Wallet
     account_committee: account.Account
     facade: ChainFacade
+    runtime_logs: list[RuntimeLog]
 
     def __init__(self, config_path: Optional[str] = None):
         self.data_dir = pathlib.Path(__file__).parent.joinpath("data")
@@ -36,6 +52,7 @@ class NeoGoNode:
         self._ready = False
         self._terminate = False
         self._parse_config()
+        self.runtime_logs = []
 
     def start(self):
         log.debug("starting")
@@ -63,6 +80,11 @@ class NeoGoNode:
                     self._ready = True
                     # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
                     # we'll eventually hit the PIPE buffer limit and hang the child process.
+                if match := RE_RUNTIME_LOG.match(output):
+                    txid = types.UInt256.from_string(match.group(1))
+                    contract = types.UInt160.from_string(match.group(2))
+                    msg = match.group(3)
+                    self.runtime_logs.append(RuntimeLog(txid, contract, msg))
                 if self._terminate:
                     break
 
