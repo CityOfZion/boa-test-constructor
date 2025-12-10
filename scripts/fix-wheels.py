@@ -7,6 +7,7 @@ picked up when packaging. `python -m build` creates a universal wheel and that n
 platform tag before uploading to PyPi. This cannot be done by simply renaming the file, it also does internal changes in
 the wheel hence this script.
 """
+
 import sys
 import pathlib
 import sysconfig

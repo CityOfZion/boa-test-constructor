@@ -11,8 +11,7 @@ from typing import Any
 
 
 class PostProcessor(Protocol):
-    def __call__(self, data: bytes, *args: Any) -> Any:
-        ...
+    def __call__(self, data: bytes, *args: Any) -> Any: ...
 
 
 def as_uint160(data: bytes, *_: Any) -> types.UInt160:
