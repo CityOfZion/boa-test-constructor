@@ -5,7 +5,7 @@ description = """This project provides a unittest class for testing NEO3 Blockch
        It includes all necessary dependencies like a staic binary of a neo-go node to run tests against.
        """
 readme = "README.rst"
-requires-python = ">=3.12,<=3.14"
+requires-python = ">=3.13,< 3.15"
 license = {file = "LICENSE.rst"}
 keywords = ["NEO3", "Blockchain", "unit test"]
 authors = [
@@ -15,7 +15,7 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
-   "neo-mamba~=3.0.1",
+   "neo-mamba~=3.2.0",
    "PyYAML"
 ]
 
