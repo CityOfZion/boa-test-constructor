@@ -15,7 +15,7 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
-   "neo-mamba~=3.2.0",
+   "neo-mamba~=3.2.2",
    "PyYAML"
 ]
 
