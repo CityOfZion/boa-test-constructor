@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from boaconstructor.node import NeoGoNode
 from boaconstructor.storage import PostProcessor
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 ASSERT_REASON = re.compile(r".*Reason: (.*)")
 
