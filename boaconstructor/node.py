@@ -1,3 +1,4 @@
+import codecs
 import pathlib
 import threading
 import subprocess
@@ -20,7 +21,7 @@ log = logging.getLogger("neogo")
 log.addHandler(logging.StreamHandler(sys.stdout))
 
 RE_RUNTIME_LOG = re.compile(
-    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \"(.*?)\", \"msg\": \"(.*?)\""
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \"(.*?)\", \"msg\": \"(.*?)\"}"
 )
 
 RE_CAPTURE_START_IGNORE_MARKER = re.compile(
@@ -101,7 +102,7 @@ class NeoGoNode:
                 elif (match := RE_RUNTIME_LOG.match(output)) is not None and capture:
                     txid = types.UInt256.from_string(match.group(1))
                     contract = types.UInt160.from_string(match.group(2))
-                    msg = match.group(3)
+                    msg = codecs.decode(match.group(3), 'unicode_escape')
                     self.runtime_logs.append(RuntimeLog(txid, contract, msg))
                 if self._terminate:
                     break

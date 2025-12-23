@@ -4,7 +4,7 @@
     "abi": {
         "methods": [
             {
-                "name": "main",
+                "name": "print_str",
                 "offset": 0,
                 "parameters": [
                     {
@@ -14,11 +14,45 @@
                 ],
                 "safe": false,
                 "returntype": "Void"
+            },
+            {
+                "name": "print_bytes",
+                "offset": 33,
+                "parameters": [
+                    {
+                        "type": "ByteArray",
+                        "name": "msg"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Void"
+            },
+            {
+                "name": "print_list",
+                "offset": 66,
+                "parameters": [
+                    {
+                        "type": "Array",
+                        "generic": {
+                            "type": "Any"
+                        },
+                        "name": "msg"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Void"
             }
         ],
         "events": []
     },
-    "permissions": [],
+    "permissions": [
+        {
+            "contract": "0xacce6fd80d44e1796aa0c2c625e9e4e0ce39efc0",
+            "methods": [
+                "jsonSerialize"
+            ]
+        }
+    ],
     "trusts": [],
     "features": {},
     "supportedstandards": [],
