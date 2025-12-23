@@ -102,7 +102,7 @@ class NeoGoNode:
                 elif (match := RE_RUNTIME_LOG.match(output)) is not None and capture:
                     txid = types.UInt256.from_string(match.group(1))
                     contract = types.UInt160.from_string(match.group(2))
-                    msg = codecs.decode(match.group(3), 'unicode_escape')
+                    msg = codecs.decode(match.group(3), "unicode_escape")
                     self.runtime_logs.append(RuntimeLog(txid, contract, msg))
                 if self._terminate:
                     break
