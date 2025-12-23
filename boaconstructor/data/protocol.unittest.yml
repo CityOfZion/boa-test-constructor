@@ -61,3 +61,9 @@ ApplicationConfiguration:
     Enabled: false #since it's not useful for unit tests.
     Addresses:
       - ":2113"
+  Oracle:
+    Enabled: true
+    AllowPrivateHost: true
+    UnlockWallet:
+      Path: "wallet1_solo.json"
+      Password: "one"
