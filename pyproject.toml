@@ -15,7 +15,7 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
-   "neo-mamba @ git+https://github.com/CityOfZion/neo-mamba.git@73ffb00d793fa34d4e7f3253f7d4597cafbec5df",
+   "neo-mamba @ git+https://github.com/CityOfZion/neo-mamba.git@d751a38d05ff0d8d09154cde6495e96d84daec38",
    "PyYAML",
    "typing-extensions"
 ]
