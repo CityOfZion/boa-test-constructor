@@ -79,7 +79,7 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         method: str,
         args: Optional[list] = None,
         *,
-        return_type: Type[T],
+        return_type: Type[T] | None,
         signing_accounts: Optional[Sequence[account.Account]] = None,
         signers: Optional[Sequence[Signer]] = None,
         target_contract: Optional[types.UInt160] = None,
