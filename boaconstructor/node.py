@@ -11,6 +11,7 @@ import re
 from neo3.core import types
 from neo3.wallet import wallet, account
 from neo3.api.wrappers import ChainFacade
+from neo3.api.helpers.txbuilder import START_IGNORE_RUNTIMELOG, STOP_IGNORE_RUNTIMELOG
 from typing import Optional
 from dataclasses import dataclass
 
@@ -22,13 +23,12 @@ RE_RUNTIME_LOG = re.compile(
     r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \"(.*?)\", \"msg\": \"(.*?)\""
 )
 
-STOP_MARKER = "STOP_RUNTIMELOG_CAPTURE"
-RE_CAPTURE_STOP_MARKER = re.compile(
-    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + STOP_MARKER + "\""
+RE_CAPTURE_START_IGNORE_MARKER = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + START_IGNORE_RUNTIMELOG + "\""
 )
-START_MARKER = "START_RUNTIMELOG_CAPTURE"
-RE_CAPTURE_START_MARKER = re.compile(
-    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + START_MARKER + "\""
+
+RE_CAPTURE_STOP_IGNORE_MARKER = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + STOP_IGNORE_RUNTIMELOG + "\""
 )
 
 
@@ -91,11 +91,11 @@ class NeoGoNode:
                     self._ready = True
                     # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
                     # we'll eventually hit the PIPE buffer limit and hang the child process.
-                if RE_CAPTURE_STOP_MARKER.match(output) is not None:
+                if RE_CAPTURE_START_IGNORE_MARKER.match(output) is not None:
                     capture = False
-                if RE_CAPTURE_START_MARKER.match(output) is not None:
+                elif RE_CAPTURE_STOP_IGNORE_MARKER.match(output) is not None:
                     capture = True
-                if (match := RE_RUNTIME_LOG.match(output)) is not None and capture:
+                elif (match := RE_RUNTIME_LOG.match(output)) is not None and capture:
                     txid = types.UInt256.from_string(match.group(1))
                     contract = types.UInt160.from_string(match.group(2))
                     msg = match.group(3)
@@ -148,3 +148,4 @@ class NeoGoNode:
             address = data["RPC"]["Addresses"][0]
             host = f"http://{address}"
             self.facade = ChainFacade(rpc_host=host)
+            self.facade._emit_log_marker = True
