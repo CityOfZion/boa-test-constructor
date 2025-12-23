@@ -24,11 +24,15 @@ RE_RUNTIME_LOG = re.compile(
 )
 
 RE_CAPTURE_START_IGNORE_MARKER = re.compile(
-    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + START_IGNORE_RUNTIMELOG + "\""
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \""
+    + START_IGNORE_RUNTIMELOG
+    + '"'
 )
 
 RE_CAPTURE_STOP_IGNORE_MARKER = re.compile(
-    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \"" + STOP_IGNORE_RUNTIMELOG + "\""
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \""
+    + STOP_IGNORE_RUNTIMELOG
+    + '"'
 )
 
 
@@ -86,7 +90,6 @@ class NeoGoNode:
         def process_stdout(process):
             capture = True
             for output in iter(process.stdout.readline, b""):
-                print(output)
                 if "RPC server already started" in output:
                     self._ready = True
                     # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
