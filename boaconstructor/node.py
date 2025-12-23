@@ -7,18 +7,47 @@ import sys
 import time
 import yaml
 import platform
+import re
+from neo3.core import types
 from neo3.wallet import wallet, account
 from neo3.api.wrappers import ChainFacade
+from neo3.api.helpers.txbuilder import START_IGNORE_RUNTIMELOG, STOP_IGNORE_RUNTIMELOG
 from typing import Optional
+from dataclasses import dataclass
+
 
 log = logging.getLogger("neogo")
 log.addHandler(logging.StreamHandler(sys.stdout))
+
+RE_RUNTIME_LOG = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \"(.*?)\", \"msg\": \"(.*?)\""
+)
+
+RE_CAPTURE_START_IGNORE_MARKER = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \""
+    + START_IGNORE_RUNTIMELOG
+    + '"'
+)
+
+RE_CAPTURE_STOP_IGNORE_MARKER = re.compile(
+    r"INFO\truntime log\t{\"tx\": \"(.*?)\", \"script\": \".*?\", \"msg\": \""
+    + STOP_IGNORE_RUNTIMELOG
+    + '"'
+)
+
+
+@dataclass
+class RuntimeLog:
+    txid: types.UInt256
+    contract: types.UInt160
+    msg: str
 
 
 class NeoGoNode:
     wallet: wallet.Wallet
     account_committee: account.Account
     facade: ChainFacade
+    runtime_logs: list[RuntimeLog]
 
     def __init__(self, config_path: Optional[str] = None):
         self.data_dir = pathlib.Path(__file__).parent.joinpath("data")
@@ -36,6 +65,7 @@ class NeoGoNode:
         self._ready = False
         self._terminate = False
         self._parse_config()
+        self.runtime_logs = []
 
     def start(self):
         log.debug("starting")
@@ -58,11 +88,21 @@ class NeoGoNode:
         )
 
         def process_stdout(process):
+            capture = True
             for output in iter(process.stdout.readline, b""):
                 if "RPC server already started" in output:
                     self._ready = True
                     # WARNING: do not terminate this loop. stdout must be read as long as the process lives otherwise
                     # we'll eventually hit the PIPE buffer limit and hang the child process.
+                if RE_CAPTURE_START_IGNORE_MARKER.match(output) is not None:
+                    capture = False
+                elif RE_CAPTURE_STOP_IGNORE_MARKER.match(output) is not None:
+                    capture = True
+                elif (match := RE_RUNTIME_LOG.match(output)) is not None and capture:
+                    txid = types.UInt256.from_string(match.group(1))
+                    contract = types.UInt160.from_string(match.group(2))
+                    msg = match.group(3)
+                    self.runtime_logs.append(RuntimeLog(txid, contract, msg))
                 if self._terminate:
                     break
 
@@ -111,3 +151,4 @@ class NeoGoNode:
             address = data["RPC"]["Addresses"][0]
             host = f"http://{address}"
             self.facade = ChainFacade(rpc_host=host)
+            self.facade._emit_log_marker = True

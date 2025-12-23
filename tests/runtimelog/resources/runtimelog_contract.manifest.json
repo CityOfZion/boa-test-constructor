@@ -1,0 +1,26 @@
+{
+    "name": "runtimelog_contract",
+    "groups": [],
+    "abi": {
+        "methods": [
+            {
+                "name": "main",
+                "offset": 0,
+                "parameters": [
+                    {
+                        "type": "String",
+                        "name": "msg"
+                    }
+                ],
+                "safe": false,
+                "returntype": "Void"
+            }
+        ],
+        "events": []
+    },
+    "permissions": [],
+    "trusts": [],
+    "features": {},
+    "supportedstandards": [],
+    "extra": null
+}

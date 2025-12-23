@@ -15,8 +15,9 @@ authors = [
 ]
 dynamic = ["version"]
 dependencies = [
-   "neo-mamba~=3.2.2",
-   "PyYAML"
+   "neo-mamba==3.3.0",
+   "PyYAML",
+   "typing-extensions"
 ]
 
 [project.optional-dependencies]
