@@ -4,7 +4,7 @@ import asyncio
 import signal
 import re
 import inspect
-from typing import Optional, TypeVar, Type, Sequence
+from typing import Optional, TypeVar, Type, Sequence, overload
 from neo3.core import types, cryptography
 from neo3.wallet import account
 from neo3.api.wrappers import GenericContract, NEP17Contract, ChainFacade
@@ -73,6 +73,20 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         signal.signal(signal.SIGINT, cleanup)
         cls.node.start()
 
+    @overload
+    @classmethod
+    async def call(
+        cls,
+        method: str,
+        args: Optional[list] = None,
+        *,
+        return_type: None,
+        signing_accounts: Optional[Sequence[account.Account]] = None,
+        signers: Optional[Sequence[Signer]] = None,
+        target_contract: Optional[types.UInt160] = None,
+    ) -> tuple[None, list[noderpc.Notification]]: ...
+
+    @overload
     @classmethod
     async def call(
         cls,
@@ -80,6 +94,18 @@ class SmartContractTestCase(unittest.IsolatedAsyncioTestCase):
         args: Optional[list] = None,
         *,
         return_type: Type[T],
+        signing_accounts: Optional[Sequence[account.Account]] = None,
+        signers: Optional[Sequence[Signer]] = None,
+        target_contract: Optional[types.UInt160] = None,
+    ) -> tuple[T, list[noderpc.Notification]]: ...
+
+    @classmethod
+    async def call(
+        cls,
+        method: str,
+        args: Optional[list] = None,
+        *,
+        return_type,
         signing_accounts: Optional[Sequence[account.Account]] = None,
         signers: Optional[Sequence[Signer]] = None,
         target_contract: Optional[types.UInt160] = None,
