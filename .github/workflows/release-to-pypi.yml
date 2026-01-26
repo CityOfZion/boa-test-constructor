@@ -39,7 +39,7 @@ jobs:
           tar -xf boatest.tar.gz
           cd boatest
           source venv/bin/activate
-          pip install wheel
+          pip install wheel==0.45.1
           make build
       - if: success() && matrix.os == 'windows-latest'
         name: extract and build
