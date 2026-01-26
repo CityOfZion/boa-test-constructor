@@ -49,7 +49,7 @@ check_untyped_defs = true
 disable_error_code = "func-returns-value"
 
 [tool.bumpversion]
-current_version = "0.6.0"
+current_version = "0.7.0"
 commit = true
 tag = true
 
