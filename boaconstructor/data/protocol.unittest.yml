@@ -14,6 +14,7 @@ ProtocolConfiguration:
     Cockatrice: 0
     Domovoi: 0
     Echidna: 0
+    Faun: 0
 
 ApplicationConfiguration:
   SkipBlockVerification: false

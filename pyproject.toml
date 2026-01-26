@@ -42,7 +42,7 @@ build-backend = "setuptools.build_meta"
 target-version = ['py313']
 
 [tool.neogo]
-tag = "v0.110.0"
+tag = "v0.116.0"
 
 [tool.mypy]
 check_untyped_defs = true
