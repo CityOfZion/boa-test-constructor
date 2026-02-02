@@ -47,7 +47,7 @@ jobs:
           tar -xf boatest.tar.gz
           cd boatest
           venv\Scripts\activate
-          pip install wheel
+          pip install wheel==0.45.1
           make build
       - name: Validate dist
         run: |
